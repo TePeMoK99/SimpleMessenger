@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "src/mytcpclient.h"
+#include "src/chatmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,8 +12,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    MyTcpClient *client {new MyTcpClient()};
-    engine.rootContext()->setContextProperty("Client", client);
+    ChatModel *chat_model {new ChatModel()};
+    engine.rootContext()->setContextProperty("ChatModel", chat_model);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

@@ -16,7 +16,7 @@ public slots:
 
 private slots:
     void incomingConnection(qintptr handle) override;   // Call when new connection incoming
-    void socketReady(); // Call when emit readyRead()
+    void socketReady();         // Call when emit readyRead()
     void socketDisconnected();  // Call when emit disconnected()
 
 private:

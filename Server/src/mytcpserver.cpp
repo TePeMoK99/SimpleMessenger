@@ -37,5 +37,5 @@ void MyTCPServer::socketReady()
 void MyTCPServer::socketDisconnected()
 {
     qDebug() << "Disc";
-    socket->deleteLater();
+//    socket->deleteLater();
 }

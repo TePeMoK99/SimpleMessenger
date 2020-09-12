@@ -26,5 +26,5 @@ void MyTcpClient::socketReady()
 
 void MyTcpClient::socketDisconnected()
 {
-    socket->deleteLater();
+    socket->deleteLater();        
 }
