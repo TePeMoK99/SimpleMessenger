@@ -18,7 +18,7 @@ ApplicationWindow {
         id: roomname_text
         anchors.bottom: list_view.top
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "Room: 09-841"
+        text: "Room: 09-841 v.1"
         font.pixelSize: 20
         font.bold: true
         visible: root.logged
@@ -42,6 +42,7 @@ ApplicationWindow {
             sender: sender_
             message: message_
             time: time_
+            color: color_
         }
     }
 
@@ -80,7 +81,7 @@ ApplicationWindow {
             enabled: text_input.length > 0
 
             onPressed: {
-                ChatModel.sendMessage(text_input.text)
+                ChatModel.sendPublicMessage(text_input.text)
                 text_input.text = ""
             }
         }
@@ -90,7 +91,16 @@ ApplicationWindow {
         id: nickname_field
         anchors.centerIn: parent
         visible: !root.logged
+        placeholderText: "Enter your nickname..."
     }
+
+//    TextField {
+//        id: port_field
+//        anchors.top: nickname_field.bottom
+//        anchors.horizontalCenter: nickname_field.horizontalCenter
+//        visible: !root.logged
+//        placeholderText: "Enter port..."
+//    }
 
     Button {
         id: enter_button
@@ -101,9 +111,8 @@ ApplicationWindow {
         enabled: nickname_field.length
 
         onClicked: {
-            ChatModel.enterChat(nickname_field.text, 55555)
+            ChatModel.joinChat(nickname_field.text)
             root.logged = true
         }
-    }
-
+    }    
 }

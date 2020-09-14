@@ -4,22 +4,32 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-class MyTCPServer : public QTcpServer
+#include "mytcpclient.h"
+
+class MyTcpClient;
+
+class MyTcpServer : public QTcpServer
 {
     Q_OBJECT
 
 public:
-    MyTCPServer();
+    MyTcpServer();
 
-public slots:
-    bool startServer(); // Method for starting server
+    bool start(const QHostAddress &address, const int &port);
+    bool start(const QString &address_str, const int &port);
+    void sendMessageToAll(const QString &message, const QString &sender) const;
+    void sendMessageToUser(const QString &message, const QString &reciever, const QString &sender) const;
+    void sendMessageUserJoin(const QString &new_user) const;
+    void sendUsersList() const;
+    bool isNicknameUsed(const QString &nickname) const;
+    void removeSocketFromList(const QString &client_name);
+
+    static QByteArray makeByteArray(const int &msg_type, const QStringList &params);
 
 private slots:
-    void incomingConnection(qintptr handle) override;   // Call when new connection incoming
-    void socketReady();         // Call when emit readyRead()
-    void socketDisconnected();  // Call when emit disconnected()
+    void incomingConnection(const qintptr handle) override;
 
 private:
-    QTcpSocket *socket;         // socket
-    QByteArray data;            // ByteArray for data
+    QTcpSocket *socket;
+    QList<MyTcpClient*> clients_list;
 };

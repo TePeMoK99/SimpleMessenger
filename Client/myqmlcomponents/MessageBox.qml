@@ -1,7 +1,4 @@
 ﻿import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.12
 
 RowLayout {
@@ -9,6 +6,7 @@ RowLayout {
     property string sender: ""
     property string message: ""
     property string time: ""
+    property string color: ""
     property bool isMy: false
 
     width: parent.width
@@ -34,6 +32,7 @@ RowLayout {
             anchors.verticalCenter: parent.verticalCenter
             anchors.leftMargin: 25
             font.pixelSize: 20
+            color: root_row.color
 
             width: paintedWidth > 350 ? 350 : paintedWidth
             wrapMode: Text.WordWrap
@@ -45,6 +44,8 @@ RowLayout {
             anchors.bottom: message_text.top
             anchors.left: message_text.left
             font.underline: true
+            font.pixelSize: 10
+            color: "gray"
         }
 
         Text {
