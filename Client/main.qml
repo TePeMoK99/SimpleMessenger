@@ -7,12 +7,20 @@ import "myqmlcomponents/"
 
 ApplicationWindow {
     id: root
-    property bool logged: false
     visible: true
     width: 600
     height: 800
     color: "lightgray"
 
+    Button {
+        id: exit_button
+        anchors.right: parent.right
+        anchors.top: parent.top
+        text: "X"
+        visible: ChatModel.isAuth
+
+        onClicked: ChatModel.leftChat()
+    }
 
     Text {
         id: roomname_text
@@ -21,7 +29,7 @@ ApplicationWindow {
         text: "Room: 09-841 v.1"
         font.pixelSize: 20
         font.bold: true
-        visible: root.logged
+        visible: ChatModel.isAuth
     }
 
     ListView {
@@ -29,7 +37,7 @@ ApplicationWindow {
         anchors.fill: parent
         anchors.bottomMargin: 75
         anchors.topMargin: 25
-        visible: root.logged
+        visible: ChatModel.isAuth
 
         spacing: 15
         clip: true
@@ -49,18 +57,15 @@ ApplicationWindow {
     TextField {
         id: text_input
 
-//        width: parent.width - 100
         height: 50
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.margins: 12.5
         anchors.right: send_button.left
         font.pixelSize: 20
-        visible: root.logged
+        visible: ChatModel.isAuth
 
         placeholderText: "Type a message"
-
-
     }
 
     Rectangle {
@@ -68,7 +73,7 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.margins: 12.5
-        visible: root.logged
+        visible: ChatModel.isAuth
 
         color: mouse_area.containsMouse ? "green" : "lightgreen"
         width: 50
@@ -90,29 +95,21 @@ ApplicationWindow {
     TextField {
         id: nickname_field
         anchors.centerIn: parent
-        visible: !root.logged
+        visible: !ChatModel.isAuth
         placeholderText: "Enter your nickname..."
     }
-
-//    TextField {
-//        id: port_field
-//        anchors.top: nickname_field.bottom
-//        anchors.horizontalCenter: nickname_field.horizontalCenter
-//        visible: !root.logged
-//        placeholderText: "Enter port..."
-//    }
 
     Button {
         id: enter_button
         anchors.top: nickname_field.bottom
         anchors.horizontalCenter: nickname_field.horizontalCenter
-        visible: !root.logged
+        visible: !ChatModel.isAuth
         text: "Login"
         enabled: nickname_field.length
 
         onClicked: {
             ChatModel.joinChat(nickname_field.text)
-            root.logged = true
+            visible: ChatModel.isAuth
         }
     }    
 }

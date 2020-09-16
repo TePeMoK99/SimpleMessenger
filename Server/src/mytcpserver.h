@@ -17,9 +17,12 @@ public:
 
     bool start(const QHostAddress &address, const int &port);
     bool start(const QString &address_str, const int &port);
-    void sendMessageToAll(const QString &message, const QString &sender) const;
     void sendMessageToUser(const QString &message, const QString &reciever, const QString &sender) const;
+    void sendMessageToAll(const QString &message, const QString &sender) const;
     void sendMessageUserJoin(const QString &new_user) const;
+    void sendMessageUserLeft(const QString &user) const;
+    void sendAuthSuccess(const QString &reciever) const;
+    void sendAuthFail(const QString &reciever) const;
     void sendUsersList() const;
     bool isNicknameUsed(const QString &nickname) const;
     void removeSocketFromList(const QString &client_name);

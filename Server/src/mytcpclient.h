@@ -23,7 +23,7 @@ private:
     quintptr handle;
     MyTcpServer *tcp_server;
     quint16 block_size;
-    QString nickname;
+    QString client_name;
     QTcpSocket *tcp_socket;
     bool isAuth;
 };

@@ -1,5 +1,8 @@
 ﻿#include "mytcpclient.h"
+
 #include <QDataStream>
+#include <windows.h>
+
 #include "types.h"
 
 MyTcpClient::MyTcpClient() : client_name {"Default"}, block_size {0}
@@ -10,40 +13,13 @@ MyTcpClient::MyTcpClient() : client_name {"Default"}, block_size {0}
     connect(tcp_socket, &QTcpSocket::disconnected, this, &MyTcpClient::socketDisconnected);
 }
 
-MyTcpClient::MyTcpClient(const QString &nickname) : client_name {nickname}, block_size {0}
-{
-    tcp_socket = new QTcpSocket(this);
-    connect(tcp_socket, &QTcpSocket::readyRead, this, &MyTcpClient::socketReadyRead);
-    connect(tcp_socket, &QTcpSocket::connected, this, &MyTcpClient::socketConnected);
-    connect(tcp_socket, &QTcpSocket::disconnected, this, &MyTcpClient::socketDisconnected);
-}
-
 void MyTcpClient::sendPublicMessage(const QString &message_text)
 {
-//    QByteArray data;
-//    QDataStream data_stream(&data, QIODevice::WriteOnly);
-//    data_stream << quint16(0) << quint8(MessageTypes::PUBLIC_MESSAGE) << message_text;
-
-//    data_stream.device()->seek(0);
-
-//    data_stream << (quint16)(data.size() - sizeof(quint16));;
-//    data_stream.device()->seek(0);
-
-//    tcp_socket->write(data);
     tcp_socket->write(makeByteArray(MessageTypes::PUBLIC_MESSAGE, {message_text}));
 }
 
 void MyTcpClient::sendPrivateMessage(const QString &reciever, const QString &message_text)
 {
-//    QByteArray data;
-//    QDataStream data_stream(&data, QIODevice::WriteOnly);
-//    data_stream << quint16(0) << quint8(MessageTypes::PRIVATE_MESSAGE) << reciever << message_text;
-
-//    data_stream.device()->seek(0);
-
-//    data_stream << static_cast<quint16>(data.size() - sizeof(quint16));
-
-//    tcp_socket->write(data);
     tcp_socket->write(makeByteArray(MessageTypes::PRIVATE_MESSAGE, {reciever, message_text}));
 }
 
@@ -65,19 +41,18 @@ QByteArray MyTcpClient::makeByteArray(const int &msg_type, const QStringList &pa
     return data;
 }
 
-void MyTcpClient::joinChat(const QString &host, const int &port)
+void MyTcpClient::joinChat(const QString &host, const int &port, const QString &nickname)
 {
+    client_name = nickname;
     tcp_socket->connectToHost(host, port);
-
-//    QByteArray data;
-//    QDataStream data_stream {&data, QIODevice::WriteOnly};
-
-//    data_stream << quint16(0) << quint8(MessageTypes::AUTH_REQUEST) << client_name;
-//    data_stream.device()->seek(0);
-//    data_stream << quint16(data.size() - sizeof(quint16));
-
-//    tcp_socket->write(data);
     tcp_socket->write(makeByteArray(MessageTypes::AUTH_REQUEST, {client_name}));
+}
+
+void MyTcpClient::leftChat()
+{
+    socketDisconnected();
+
+    emit userAuthFail();
 }
 
 void MyTcpClient::socketReadyRead()
@@ -97,8 +72,7 @@ void MyTcpClient::socketReadyRead()
     {
         return;
     }
-    else
-        block_size = 0;
+    block_size = 0;
 
     quint8 type {};
     data_stream >> type;
@@ -107,12 +81,35 @@ void MyTcpClient::socketReadyRead()
     {
     case MessageTypes::AUTH_SUCCESS:
     {
-        // TODO: отправить в модель уведомление об успехе
+        qDebug() << "C_Case AUTH_SUCCESS";
+
+        emit userAuthSuccess();
+
         break;
     }
     case MessageTypes::AUTH_FAIL:
     {
-        // TODO: отправить в модель уведомление о неудаче
+        qDebug() << "C_Case AUTH_FAIL";
+        emit userAuthFail();
+
+        break;
+    }
+    case MessageTypes::USER_JOIN:
+    {
+        QString name {};
+        data_stream >> name;
+        qDebug() << "C_Case USER_JOIN " << name;
+        emit userJoinRecieved(name);
+        // TODO: добавить пользователя в список активных
+        break;
+    }
+    case MessageTypes::USER_LEFT:
+    {
+        qDebug() << "C_Case USER_LEFT";
+        QString name {};
+        data_stream >> name;
+        emit userLeftRecieved(name);
+        // TODO: убрать пользователя из списка активных
         break;
     }
     case MessageTypes::USERS_LIST:
@@ -149,22 +146,6 @@ void MyTcpClient::socketReadyRead()
 
         break;
     }
-    case MessageTypes::USER_JOIN:
-    {
-        QString name {};
-        data_stream >> name;
-        qDebug() << "C_Case USER_JOIN " << name;
-        // TODO: добавить пользователя в список активных
-        break;
-    }
-    case MessageTypes::USER_LEFT:
-    {
-        qDebug() << "C_Case USER_LEFT";
-        QString name {};
-        data_stream >> name;
-        // TODO: убрать пользователя из списка активных
-        break;
-    }
     }
 }
 
@@ -175,5 +156,8 @@ void MyTcpClient::socketConnected()
 
 void MyTcpClient::socketDisconnected()
 {
-
+    tcp_socket->write(makeByteArray(MessageTypes::USER_LEFT, {client_name}));
+    client_name = "";
+    Sleep(250);
+    deleteLater();
 }

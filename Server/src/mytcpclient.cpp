@@ -1,9 +1,10 @@
 ﻿#include "mytcpclient.h"
 #include "types.h"
+#include <windows.h>
 #include <QDataStream>
 
 MyTcpClient::MyTcpClient(const quintptr handle, MyTcpServer *server, QObject *parent) :
-    QObject {parent}, handle {handle}, tcp_server {server}, block_size {0}, nickname {}, isAuth {false}
+    QObject {parent}, handle {handle}, tcp_server {server}, block_size {0}, client_name {}, isAuth {false}
 {
     tcp_socket = new QTcpSocket(this);
     tcp_socket->setSocketDescriptor(handle);
@@ -20,8 +21,7 @@ void MyTcpClient::socketConnected()
 
 void MyTcpClient::socketDisconnected()
 {
-    // TODO: передать серверу, что клиент отключился
-    tcp_server->removeSocketFromList(nickname);
+    tcp_server->removeSocketFromList(client_name);
     isAuth = false;
     qDebug() << "Socket " << handle << " disconnected";
     deleteLater();
@@ -44,8 +44,7 @@ void MyTcpClient::socketReadyRead()
     {
         return;
     }
-    else
-        block_size = 0;
+    block_size = 0;
 
     quint8 type {};
     data_stream >> type;
@@ -61,11 +60,15 @@ void MyTcpClient::socketReadyRead()
 
         if (!tcp_server->isNicknameUsed(name))
         {
-            nickname = name;
+            client_name = name;
             isAuth = true;
+            tcp_server->sendAuthSuccess(client_name);
+            tcp_server->sendMessageUserJoin(client_name);
         }
-
-        tcp_server->sendMessageUserJoin(nickname);
+        else
+        {
+            tcp_server->sendAuthFail(client_name);
+        }
 
         break;
     }
@@ -82,7 +85,7 @@ void MyTcpClient::socketReadyRead()
         QString message {};
         data_stream >> message;
 
-        tcp_server->sendMessageToAll(message, nickname);
+        tcp_server->sendMessageToAll(message, client_name);
 
         break;
     }
@@ -94,7 +97,7 @@ void MyTcpClient::socketReadyRead()
         data_stream >> reciever;
         data_stream >> message;
 
-        tcp_server->sendMessageToUser(message, reciever, nickname);
+        tcp_server->sendMessageToUser(message, reciever, client_name);
 
         break;
     }
@@ -104,7 +107,7 @@ void MyTcpClient::socketReadyRead()
         QString name {};
         data_stream >> name;
 
-        tcp_server->sendMessageUserJoin(nickname);
+        tcp_server->sendMessageUserJoin(name);
 
         break;
     }
@@ -114,6 +117,7 @@ void MyTcpClient::socketReadyRead()
         QString name {};
         data_stream >> name;
         // TODO: передать всем остальным, что пользователь вышел
+        tcp_server->sendMessageUserLeft(name);
 
         break;
     }

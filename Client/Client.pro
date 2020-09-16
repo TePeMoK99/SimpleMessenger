@@ -16,7 +16,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         src/chatmodel.cpp \
-        src/mytcpclient.cpp
+        src/mytcpclient.cpp \
+        src/userlistmodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -35,4 +36,6 @@ HEADERS += \
     src/chatmodel.h \
     src/messageitem.h \
     src/mytcpclient.h \
-    src/types.h
+    src/types.h \
+    src/userlistitem.h \
+    src/userlistmodel.h

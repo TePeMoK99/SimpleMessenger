@@ -9,7 +9,6 @@ class MyTcpClient : public QObject
 
 public:
     MyTcpClient();
-    MyTcpClient(const QString &nickname);
 
     void sendPublicMessage(const QString &message_text);
     void sendPrivateMessage(const QString &reciever, const QString &message_text);
@@ -17,7 +16,8 @@ public:
     static QByteArray makeByteArray(const int &msg_type, const QStringList &params);
 
 public slots:
-    void joinChat(const QString &host, const int &port);
+    void joinChat(const QString &host, const int &port, const QString &nickname);
+    void leftChat();
 
 private slots:
     void socketReadyRead();
@@ -27,12 +27,16 @@ private slots:
 signals:
     void publicMessageRecieved(const QString &sender, const QString &message);
     void privateMessageRecieved(const QString &sender, const QString &message);
+
     void userJoinRecieved(const QString &sender);
     void userLeftRecieved(const QString &sender);
 
+    void userAuthSuccess();
+    void userAuthFail();
+
 private:
     QTcpSocket *tcp_socket;
-    QByteArray data;
+    QByteArray data {};
     QString client_name;
     quint16 block_size;
 };
