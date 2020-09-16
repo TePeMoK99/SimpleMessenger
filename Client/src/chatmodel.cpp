@@ -63,7 +63,6 @@ void ChatModel::joinChat(const QString &nickname)
 void ChatModel::leftChat()
 {
     tcp_client->leftChat();
-    delete tcp_client;
 }
 
 void ChatModel::sendPublicMessage(const QString &message) const
