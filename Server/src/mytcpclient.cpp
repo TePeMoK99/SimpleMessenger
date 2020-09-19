@@ -72,13 +72,6 @@ void MyTcpClient::socketReadyRead()
 
         break;
     }
-    case MessageTypes::USERS_LIST:
-    {
-        qDebug() << "S_Case USERS_LIST";
-        tcp_server->sendUsersList();
-
-        break;
-    }
     case MessageTypes::PUBLIC_MESSAGE:
     {
         qDebug() << "S_Case PUBLIC_MESSAGE";
@@ -118,6 +111,15 @@ void MyTcpClient::socketReadyRead()
         data_stream >> name;
         // TODO: передать всем остальным, что пользователь вышел
         tcp_server->sendMessageUserLeft(name);
+
+        break;
+    }
+    case MessageTypes::USERS_LIST_REQUEST:
+    {
+        QString reciever {};
+        data_stream >> reciever;
+        qDebug() << "S_Case USERS_LIST_REQUEST";
+        tcp_server->sendUsersList(reciever);
 
         break;
     }

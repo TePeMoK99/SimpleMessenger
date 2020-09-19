@@ -26,10 +26,6 @@ ApplicationWindow {
 
     UserListModel {
         id: users_model
-
-        onModelCreated: {
-            setTcpClient(chat_model.getTcpClient())
-        }
     }
 
     SwipeView {

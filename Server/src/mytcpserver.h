@@ -23,7 +23,7 @@ public:
     void sendMessageUserLeft(const QString &user) const;
     void sendAuthSuccess(const QString &reciever) const;
     void sendAuthFail(const QString &reciever) const;
-    void sendUsersList() const;
+    void sendUsersList(const QString &reciever) const;
     bool isNicknameUsed(const QString &nickname) const;
     void removeSocketFromList(const QString &client_name);
 

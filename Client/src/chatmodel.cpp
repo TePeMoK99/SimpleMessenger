@@ -4,7 +4,15 @@
 
 ChatModel::ChatModel(QObject *parent)
     : QAbstractListModel {parent}, m_isAuth {false}
-{ }
+{
+    tcp_client = MyTcpClient::instance();
+    connect(tcp_client, &MyTcpClient::userAuthSuccess,        this, &ChatModel::authSuccess);
+    connect(tcp_client, &MyTcpClient::userAuthFail,           this, &ChatModel::authFail);
+    connect(tcp_client, &MyTcpClient::userJoinRecieved,       this, &ChatModel::recieveUserJoin);
+    connect(tcp_client, &MyTcpClient::userLeftRecieved,       this, &ChatModel::recieveUserLeft);
+    connect(tcp_client, &MyTcpClient::publicMessageRecieved,  this, &ChatModel::recievePublicMessage);
+    connect(tcp_client, &MyTcpClient::privateMessageRecieved, this, &ChatModel::recievePrivateMessage);
+}
 
 int ChatModel::rowCount(const QModelIndex &parent) const
 {
@@ -45,17 +53,7 @@ QHash<int, QByteArray> ChatModel::roleNames() const
 
 void ChatModel::joinChat(const QString &nickname)
 {
-    tcp_client = MyTcpClient::instance();
     m_nickname = nickname;
-
-    connect(tcp_client, &MyTcpClient::privateMessageRecieved, this, &ChatModel::recievePrivateMessage);
-    connect(tcp_client, &MyTcpClient::publicMessageRecieved,  this, &ChatModel::recievePublicMessage);
-    connect(tcp_client, &MyTcpClient::userJoinRecieved,       this, &ChatModel::recieveUserJoin);
-    connect(tcp_client, &MyTcpClient::userLeftRecieved,       this, &ChatModel::recieveUserLeft);
-    connect(tcp_client, &MyTcpClient::userAuthSuccess,        this, &ChatModel::authSuccess);
-    connect(tcp_client, &MyTcpClient::userAuthFail,           this, &ChatModel::authFail);
-
-    // TODO: отправить сообщение о том, что пользователь присоединился
 
     tcp_client->joinChat("127.0.0.1", 11111, m_nickname);
 }
@@ -81,7 +79,6 @@ void ChatModel::setIsAuth(const bool &isAuth)
         return;
 
     m_isAuth = isAuth;
-
     emit isAuthChanged(m_isAuth);
 }
 

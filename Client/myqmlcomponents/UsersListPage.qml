@@ -15,16 +15,23 @@ Page {
         }
     }
 
+    Text {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 5
+        text: "Users online: " + users_model.usersOnline
+    }
+
     ListView {
         id: list_model
         anchors.fill: parent
-        anchors.topMargin: 25
-        clip: false
+        anchors.topMargin: 50
+        clip: true
         spacing: 10
         model: users_model
 
-        delegate: Text {
-            text: nickname_
+        delegate: UserBox {
+            nickname: nickname_
         }
     }
 }

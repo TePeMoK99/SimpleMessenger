@@ -52,6 +52,7 @@ void MyTcpServer::sendMessageToUser(const QString &message, const QString &recie
         if (i->client_name == reciever)
         {
             i->tcp_socket->write(data);
+            break;
         }
     }
     qDebug() << "Message [" << message << "] from " << sender << "sent to " << reciever;
@@ -83,7 +84,7 @@ void MyTcpServer::sendMessageUserLeft(const QString &user) const
     }
 }
 
-void MyTcpServer::sendUsersList() const
+void MyTcpServer::sendUsersList(const QString &reciever) const
 {
     QString users_str {""};
     for (auto i : clients_list)
@@ -94,9 +95,13 @@ void MyTcpServer::sendUsersList() const
 
     const QByteArray data {makeByteArray(MessageTypes::USERS_LIST, {users_str})};
 
-    for (auto i : clients_list)
+    for (auto i : clients_list)       
     {
-        i->tcp_socket->write(data);
+        if (i->client_name == reciever)
+        {
+            i->tcp_socket->write(data);
+            break;
+        }
     }
 }
 
@@ -109,6 +114,7 @@ void MyTcpServer::sendAuthSuccess(const QString &reciever) const
         if (i->client_name == reciever)
         {
             i->tcp_socket->write(data);
+            break;
         }
     }
 }

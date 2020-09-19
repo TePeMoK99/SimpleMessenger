@@ -27,10 +27,11 @@ RowLayout {
         Text {
             id: message_text
 
-            text: root_row.message
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.leftMargin: 25
+
+            text: root_row.message
             font.pixelSize: 20
             color: root_row.color
 
@@ -40,9 +41,10 @@ RowLayout {
 
         Text {
             id: sender_text
-            text: root_row.sender
             anchors.bottom: message_text.top
             anchors.left: message_text.left
+
+            text: root_row.sender
             font.underline: true
             font.pixelSize: 10
             color: "gray"
@@ -50,10 +52,11 @@ RowLayout {
 
         Text {
             id: time_text
-            text: root_row.time
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: message_text.right
             anchors.leftMargin: 10
+
+            text: root_row.time
             font.underline: true
         }
     }

@@ -87,9 +87,9 @@ void MyTcpClient::socketReadyRead()
     {
     case MessageTypes::AUTH_SUCCESS:
     {
-        qDebug() << "C_Case AUTH_SUCCESS";
-
+        qDebug() << "C_Case AUTH_SUCCESS";        
         emit userAuthSuccess();
+        tcp_socket->write(makeByteArray(MessageTypes::USERS_LIST_REQUEST, {client_name}));
 
         break;
     }
@@ -104,18 +104,18 @@ void MyTcpClient::socketReadyRead()
     {
         QString name {};
         data_stream >> name;
-        qDebug() << "C_Case USER_JOIN " << name;
+        qDebug() << "C_Case USER_JOIN" << name;
         emit userJoinRecieved(name);
-        // TODO: добавить пользователя в список активных
+
         break;
     }
     case MessageTypes::USER_LEFT:
     {
-        qDebug() << "C_Case USER_LEFT";
         QString name {};
         data_stream >> name;
+        qDebug() << "C_Case USER_LEFT"  << name;
         emit userLeftRecieved(name);
-        // TODO: убрать пользователя из списка активных
+
         break;
     }
     case MessageTypes::USERS_LIST:
@@ -123,8 +123,7 @@ void MyTcpClient::socketReadyRead()
         qDebug() << "C_Case USERS_LIST";
         QString users_list_str {};
         data_stream >> users_list_str;
-        QStringList users_list {users_list_str.split(",")};
-        qDebug() << users_list;
+        emit usersListRecieved(users_list_str.split(","));
 
         break;
     }
@@ -147,7 +146,6 @@ void MyTcpClient::socketReadyRead()
         QString sender {};
         data_stream >> sender;
         data_stream >> message;
-
         emit privateMessageRecieved(sender, message);
 
         break;
@@ -164,6 +162,6 @@ void MyTcpClient::socketDisconnected()
 {
     tcp_socket->write(makeByteArray(MessageTypes::USER_LEFT, {client_name}));
     client_name = "";
-    Sleep(250);
+//    Sleep(250);
     tcp_socket->disconnectFromHost();
 }

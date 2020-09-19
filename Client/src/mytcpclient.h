@@ -31,6 +31,7 @@ signals:
 
     void userJoinRecieved(const QString &sender);
     void userLeftRecieved(const QString &sender);
+    void usersListRecieved(const QStringList &users_list);
 
     void userAuthSuccess();
     void userAuthFail();

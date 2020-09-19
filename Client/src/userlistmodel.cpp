@@ -4,6 +4,9 @@ UserListModel::UserListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
     tcp_client = MyTcpClient::instance();
+    connect(tcp_client, &MyTcpClient::userJoinRecieved,  this, &UserListModel::addUser);
+    connect(tcp_client, &MyTcpClient::userLeftRecieved,  this, &UserListModel::removeUser);
+    connect(tcp_client, &MyTcpClient::usersListRecieved, this, &UserListModel::recieveUsersList);
 }
 
 int UserListModel::rowCount(const QModelIndex &parent) const
@@ -37,11 +40,26 @@ QHash<int, QByteArray> UserListModel::roleNames() const
     return roles;
 }
 
+void UserListModel::setUsersOnline(const int &users_online)
+{
+    if (m_users_online == users_online)
+        return;
+
+    m_users_online = users_online;
+    emit usersOnlineChanged(m_users_online);
+}
+
 void UserListModel::addUser(const QString &nickname)
 {
+    if (m_users_list.contains(UserListItem(nickname, true)))
+        return;
+
     emit beginInsertRows(QModelIndex(), 0, 0);
-    m_users_list.append(UserListItem(nickname, true));
+    m_users_list.push_front(UserListItem(nickname, true));
     emit endInsertRows();
+
+    m_users_online++;
+    emit usersOnlineChanged(m_users_online);
 }
 
 void UserListModel::removeUser(const QString &nickname)
@@ -55,7 +73,22 @@ void UserListModel::removeUser(const QString &nickname)
             emit beginRemoveRows(QModelIndex(), i, i);
             m_users_list.removeAt(i);
             emit endRemoveRows();
+            m_users_online--;
+            emit usersOnlineChanged(m_users_online);
             break;
         }
+    }
+}
+
+void UserListModel::recieveUsersList(const QStringList &users_list)
+{
+    emit beginRemoveRows(QModelIndex(), 0, m_users_list.size() - 1);
+    m_users_list.clear();
+    emit endRemoveRows();
+    m_users_online = 0;
+
+    for (auto i : users_list)
+    {
+        addUser(i);
     }
 }
