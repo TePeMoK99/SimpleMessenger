@@ -6,9 +6,10 @@
 class MyTcpClient : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(MyTcpClient)
 
 public:
-    MyTcpClient();
+    static MyTcpClient* instance();
 
     void sendPublicMessage(const QString &message_text);
     void sendPrivateMessage(const QString &reciever, const QString &message_text);
@@ -35,6 +36,8 @@ signals:
     void userAuthFail();
 
 private:
+    MyTcpClient();
+
     QTcpSocket *tcp_socket;
     QByteArray data {};
     QString client_name;

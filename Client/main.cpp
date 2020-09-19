@@ -1,8 +1,10 @@
 ﻿#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+
 #include "src/mytcpclient.h"
 #include "src/chatmodel.h"
+#include "src/userlistmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,8 +14,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    ChatModel *chat_model {new ChatModel()};
-    engine.rootContext()->setContextProperty("ChatModel", chat_model);
+    qmlRegisterType<ChatModel>("ChatModel", 1, 0, "ChatModel");
+    qmlRegisterType<UserListModel>("UserListModel", 1, 0, "UserListModel");
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

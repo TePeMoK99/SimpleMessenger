@@ -45,7 +45,7 @@ QHash<int, QByteArray> ChatModel::roleNames() const
 
 void ChatModel::joinChat(const QString &nickname)
 {
-    tcp_client = new MyTcpClient();
+    tcp_client = MyTcpClient::instance();
     m_nickname = nickname;
 
     connect(tcp_client, &MyTcpClient::privateMessageRecieved, this, &ChatModel::recievePrivateMessage);

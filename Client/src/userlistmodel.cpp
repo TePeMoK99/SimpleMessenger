@@ -3,6 +3,7 @@
 UserListModel::UserListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
+    tcp_client = MyTcpClient::instance();
 }
 
 int UserListModel::rowCount(const QModelIndex &parent) const
@@ -34,4 +35,27 @@ QHash<int, QByteArray> UserListModel::roleNames() const
     roles[OnlineRole] = "online_";
 
     return roles;
+}
+
+void UserListModel::addUser(const QString &nickname)
+{
+    emit beginInsertRows(QModelIndex(), 0, 0);
+    m_users_list.append(UserListItem(nickname, true));
+    emit endInsertRows();
+}
+
+void UserListModel::removeUser(const QString &nickname)
+{
+    const int size {m_users_list.size()};
+
+    for (int i {0}; i < size; i++)
+    {
+        if (m_users_list[i].nickname == nickname)
+        {
+            emit beginRemoveRows(QModelIndex(), i, i);
+            m_users_list.removeAt(i);
+            emit endRemoveRows();
+            break;
+        }
+    }
 }

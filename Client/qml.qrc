@@ -2,5 +2,9 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>myqmlcomponents/MessageBox.qml</file>
+        <file>myqmlcomponents/LoginPage.qml</file>
+        <file>myqmlcomponents/ChatPage.qml</file>
+        <file>myqmlcomponents/UsersListPage.qml</file>
+        <file>myqmlcomponents/UserBox.qml</file>
     </qresource>
 </RCC>

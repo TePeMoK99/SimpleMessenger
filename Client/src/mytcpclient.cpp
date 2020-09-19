@@ -13,6 +13,12 @@ MyTcpClient::MyTcpClient() : client_name {"Default"}, block_size {0}
     connect(tcp_socket, &QTcpSocket::disconnected, this, &MyTcpClient::socketDisconnected);
 }
 
+MyTcpClient* MyTcpClient::instance()
+{
+    static MyTcpClient inst;
+    return &inst;
+}
+
 void MyTcpClient::sendPublicMessage(const QString &message_text)
 {
     tcp_socket->write(makeByteArray(MessageTypes::PUBLIC_MESSAGE, {message_text}));
@@ -159,5 +165,5 @@ void MyTcpClient::socketDisconnected()
     tcp_socket->write(makeByteArray(MessageTypes::USER_LEFT, {client_name}));
     client_name = "";
     Sleep(250);
-    deleteLater();
+    tcp_socket->disconnectFromHost();
 }
