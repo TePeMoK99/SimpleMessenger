@@ -112,6 +112,7 @@ Page {
             model: users_model
 
             delegate: Rectangle {
+                visible: nickname_ != chat_model.nickname
                 height: 40
                 width: parent.width
                 color: delegate_mousearea.containsMouse ? "lightgray" : "transparent"

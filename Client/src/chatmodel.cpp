@@ -96,15 +96,15 @@ void ChatModel::setNickname(const QString &nickname)
 void ChatModel::recievePublicMessage(const QString &sender, const QString &message)
 {
     if (m_nickname == sender)
-        addMessageToList(MessageItem(sender, message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
+        addMessageToList(MessageItem("You", message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
     else
         addMessageToList(MessageItem(sender, message, Qt::black, "#90EE90", false, QTime::currentTime().toString("HH:mm")));
 }
 
-void ChatModel::recievePrivateMessage(const QString &message, const QString &sender)
+void ChatModel::recievePrivateMessage(const QString &sender, const QString &message)
 {
     if (m_nickname == sender)
-        addMessageToList(MessageItem("you to " + sender, message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
+        addMessageToList(MessageItem("You", message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
     else
         addMessageToList(MessageItem(sender + " to you", message, Qt::black, "#FFB319", false, QTime::currentTime().toString("HH:mm")));
 }
