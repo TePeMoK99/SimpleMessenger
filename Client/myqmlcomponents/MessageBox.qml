@@ -6,7 +6,8 @@ RowLayout {
     property string sender: ""
     property string message: ""
     property string time: ""
-    property string color: ""
+    property string fontColor: ""
+    property string backColor: ""
     property bool isMy: false
 
     width: parent.width
@@ -22,7 +23,7 @@ RowLayout {
         Layout.leftMargin: 25
         Layout.rightMargin: 25
 
-        color: root_row.isMy ? "#9ceca2" : "#5998ee"
+        color: backColor
 
         Text {
             id: message_text
@@ -33,7 +34,7 @@ RowLayout {
 
             text: root_row.message
             font.pixelSize: 20
-            color: root_row.color
+            color: root_row.fontColor
 
             width: paintedWidth > 350 ? 350 : paintedWidth
             wrapMode: Text.WordWrap

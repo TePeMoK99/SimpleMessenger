@@ -7,6 +7,8 @@ class MyTcpClient : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(MyTcpClient)
+    friend class UserListModel;
+    friend class ChatModel;
 
 public:
     static MyTcpClient* instance();
@@ -21,8 +23,8 @@ public slots:
     void leftChat();
 
 private slots:
-    void socketReadyRead();
     void socketConnected();
+    void socketReadyRead();
     void socketDisconnected();
 
 signals:

@@ -49,10 +49,9 @@ void MyTcpServer::sendMessageToUser(const QString &message, const QString &recie
 
     for (auto i : clients_list)
     {
-        if (i->client_name == reciever)
+        if (i->client_name == reciever || i->client_name == sender)
         {
             i->tcp_socket->write(data);
-            break;
         }
     }
     qDebug() << "Message [" << message << "] from " << sender << "sent to " << reciever;

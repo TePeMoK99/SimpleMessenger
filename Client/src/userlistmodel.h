@@ -14,11 +14,11 @@ class UserListModel : public QAbstractListModel
 public:
     explicit UserListModel(QObject *parent = nullptr);
 
-
     enum Roles
     {
         NicknameRole = Qt::UserRole + 1,
-        OnlineRole
+        OnlineRole,
+        ColorRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

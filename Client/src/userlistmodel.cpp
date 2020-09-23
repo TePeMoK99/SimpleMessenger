@@ -1,7 +1,7 @@
 ﻿#include "userlistmodel.h"
 
 UserListModel::UserListModel(QObject *parent)
-    : QAbstractListModel(parent)
+    : QAbstractListModel(parent), m_users_online {0}
 {
     tcp_client = MyTcpClient::instance();
     connect(tcp_client, &MyTcpClient::userJoinRecieved,  this, &UserListModel::addUser);
@@ -26,6 +26,7 @@ QVariant UserListModel::data(const QModelIndex &index, int role) const
     {
     case NicknameRole:  return QVariant(m_users_list[index.row()].nickname);
     case OnlineRole:    return QVariant(m_users_list[index.row()].online);
+    case ColorRole:    return QVariant(m_users_list[index.row()].color);
     }
 
     return QVariant();
@@ -36,6 +37,7 @@ QHash<int, QByteArray> UserListModel::roleNames() const
     QHash<int, QByteArray> roles {};
     roles[NicknameRole] = "nickname_";
     roles[OnlineRole] = "online_";
+    roles[ColorRole] = "color_";
 
     return roles;
 }
@@ -51,11 +53,14 @@ void UserListModel::setUsersOnline(const int &users_online)
 
 void UserListModel::addUser(const QString &nickname)
 {
-    if (m_users_list.contains(UserListItem(nickname, true)))
+    if (m_users_list.contains(UserListItem(nickname, Qt::transparent, true)))
         return;
 
     emit beginInsertRows(QModelIndex(), 0, 0);
-    m_users_list.push_front(UserListItem(nickname, true));
+    if (nickname == tcp_client->client_name)
+        m_users_list.push_front(UserListItem(nickname, Qt::green, true));
+    else
+        m_users_list.push_front(UserListItem(nickname, Qt::transparent, true));
     emit endInsertRows();
 
     m_users_online++;

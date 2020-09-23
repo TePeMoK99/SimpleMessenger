@@ -1,6 +1,7 @@
 ﻿import QtQuick 2.13
-import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.12
 
 Page {
     id: root_page
@@ -16,6 +17,15 @@ Page {
         text: "X"
 
         onClicked: chat_model.leftChat()
+    }
+
+    Text {
+        id: nickname_text
+        text: "You: " + chat_model.nickname
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.leftMargin: 5
+        font.pixelSize: 20
     }
 
     Text {
@@ -38,16 +48,14 @@ Page {
             id: roomname_mousearea
             anchors.fill: parent
 
-            onClicked: {
-                swipe_view.setCurrentIndex(2)
-            }
+            onClicked: swipe_view.setCurrentIndex(2)
         }
     }
 
     ListView {
         id: list_view
         anchors.fill: parent
-        anchors.bottomMargin: 75
+        anchors.bottomMargin: 50
         anchors.topMargin: 50
 
         spacing: 15
@@ -61,43 +69,99 @@ Page {
             sender: sender_
             message: message_
             time: time_
-            color: color_
+            fontColor: font_color
+            backColor: back_color
         }
     }
 
-    TextField {
-        id: text_input
-
-        height: 50
+    RowLayout {
+        id: root_row
         anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.margins: 12.5
-        anchors.right: send_button.left
-        font.pixelSize: 20
+        width: parent.width
 
-        placeholderText: "Type a message"
-    }
+        TextField {
+            id: text_input
+            height: 50
+            Layout.alignment: Qt.AlignCenter
+            Layout.leftMargin: 5
+            Layout.fillWidth: true
+            font.pixelSize: 20
 
-    Rectangle {
-        id: send_button
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.margins: 12.5
+            placeholderText: "Type a message"
+        }
 
-        color: mouse_area.containsMouse ? "green" : "lightgreen"
-        width: 50
-        height: width
-        radius: 25
+        ComboBox {
+            id: message_type_select
 
-        MouseArea {
-            id: mouse_area
-            anchors.fill: parent
-            enabled: text_input.length > 0
+            model: ListModel {
 
-            onPressed: {
-                chat_model.sendPublicMessage(text_input.text)
-                text_input.text = ""
+                ListElement {
+                    text: "To all"
+                }
+
+                ListElement {
+                    text: "To current"
+                }
+            }
+        }
+
+        ComboBox {
+            id: reciever_select
+            property string selectedNickname: ""
+            visible: message_type_select.currentIndex == 1 ? true : false
+            model: users_model
+
+            delegate: Rectangle {
+                height: 40
+                width: parent.width
+                color: delegate_mousearea.containsMouse ? "lightgray" : "transparent"
+
+                Text {
+                    id: nickname_field
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: 5
+                    text: nickname_
+                    font.pixelSize: 14
+                }
+
+                MouseArea {
+                    id: delegate_mousearea
+                    anchors.fill: parent
+                    hoverEnabled: true
+
+                    onClicked: {
+                        reciever_select.selectedNickname = nickname_field.text
+                        reciever_select.displayText = nickname_field.text
+                    }
+                }
+            }
+
+        }
+
+        Rectangle {
+            id: send_button
+            color: mouse_area.containsMouse ? "green" : "lightgreen"
+            width: 50
+            height: width
+            radius: 25
+            Layout.rightMargin: 5
+
+            MouseArea {
+                id: mouse_area
+                anchors.fill: parent
+                enabled: text_input.length > 0
+
+                onPressed: {
+                    if (message_type_select.currentIndex == 0)
+                        chat_model.sendPublicMessage(text_input.text)
+                    else if (reciever_select.selectedNickname.length > 0)
+                        chat_model.sendPrivateMessage(reciever_select.selectedNickname, text_input.text)
+                    nickname_text.text = chat_model.nickName
+                    text_input.text = ""
+                }
             }
         }
     }
 }
+

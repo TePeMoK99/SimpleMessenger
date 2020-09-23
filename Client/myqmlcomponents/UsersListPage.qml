@@ -32,6 +32,7 @@ Page {
 
         delegate: UserBox {
             nickname: nickname_
+            color: color_
         }
     }
 }

@@ -23,7 +23,7 @@ int ChatModel::rowCount(const QModelIndex &parent) const
 }
 
 QVariant ChatModel::data(const QModelIndex &index, int role) const
-{    
+{
     if (!index.isValid())
         return QVariant();
 
@@ -33,7 +33,8 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
     case MessageRole:   return QVariant(m_messages_list[index.row()].message);
     case IsMyRole:      return QVariant(m_messages_list[index.row()].isMy);
     case TimeRole:      return QVariant(m_messages_list[index.row()].time);
-    case ColorRole:     return QVariant(m_messages_list[index.row()].color);
+    case FontColorRole: return QVariant(m_messages_list[index.row()].fontColor);
+    case BackColorRole: return QVariant(m_messages_list[index.row()].backColor);
     }
 
     return QVariant();
@@ -46,14 +47,15 @@ QHash<int, QByteArray> ChatModel::roleNames() const
     roles[MessageRole] = "message_";
     roles[TimeRole] = "time_";
     roles[IsMyRole] = "isMy_";
-    roles[ColorRole] = "color_";
+    roles[FontColorRole] = "font_color";
+    roles[BackColorRole] = "back_color";
 
     return roles;
 }
 
 void ChatModel::joinChat(const QString &nickname)
 {
-    m_nickname = nickname;
+    setNickname(nickname);
 
     tcp_client->joinChat("127.0.0.1", 11111, m_nickname);
 }
@@ -82,30 +84,39 @@ void ChatModel::setIsAuth(const bool &isAuth)
     emit isAuthChanged(m_isAuth);
 }
 
+void ChatModel::setNickname(const QString &nickname)
+{
+    if (m_nickname == nickname)
+        return;
+
+    m_nickname = nickname;
+    emit nicknameChanged(m_nickname);
+}
+
 void ChatModel::recievePublicMessage(const QString &sender, const QString &message)
 {
     if (m_nickname == sender)
-        addMessageToList(MessageItem(sender, message, Qt::black, true, QTime::currentTime().toString("HH:mm")));
+        addMessageToList(MessageItem(sender, message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
     else
-        addMessageToList(MessageItem(sender, message, Qt::black, false, QTime::currentTime().toString("HH:mm")));
+        addMessageToList(MessageItem(sender, message, Qt::black, "#90EE90", false, QTime::currentTime().toString("HH:mm")));
 }
 
 void ChatModel::recievePrivateMessage(const QString &message, const QString &sender)
 {
     if (m_nickname == sender)
-        addMessageToList(MessageItem(sender, message, Qt::black, true, QTime::currentTime().toString("HH:mm")));
+        addMessageToList(MessageItem("you to " + sender, message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
     else
-        addMessageToList(MessageItem(sender + " to you", message, Qt::black, false, QTime::currentTime().toString("HH:mm")));
+        addMessageToList(MessageItem(sender + " to you", message, Qt::black, "#FFB319", false, QTime::currentTime().toString("HH:mm")));
 }
 
 void ChatModel::recieveUserJoin(const QString &sender)
 {
-    addMessageToList(MessageItem("", sender + " join chat", Qt::darkGreen, false, QTime::currentTime().toString("HH:mm")));
+    addMessageToList(MessageItem("", sender + " join chat", Qt::darkGreen, Qt::lightGray, false, QTime::currentTime().toString("HH:mm")));
 }
 
 void ChatModel::recieveUserLeft(const QString &sender)
 {
-    addMessageToList(MessageItem("", sender + " left chat", Qt::darkRed, false, QTime::currentTime().toString("HH:mm")));
+    addMessageToList(MessageItem("", sender + " left chat", Qt::darkRed, Qt::lightGray, false, QTime::currentTime().toString("HH:mm")));
 }
 
 void ChatModel::authSuccess()

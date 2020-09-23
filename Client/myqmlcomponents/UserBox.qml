@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 RowLayout {
     id: root_row
     property string nickname: ""
+    property string color: ""
     width: parent.width
 
     Text {
@@ -12,5 +13,6 @@ RowLayout {
 
         text: root_row.nickname
         font.pixelSize: 20
+        color: parent.color
     }
 }

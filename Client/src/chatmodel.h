@@ -11,7 +11,7 @@
 class ChatModel : public QAbstractListModel
 {
     Q_OBJECT
-
+    Q_PROPERTY(QString nickname READ nickname WRITE setNickname NOTIFY nicknameChanged)
     Q_PROPERTY(bool isAuth READ isAuth WRITE setIsAuth NOTIFY isAuthChanged)
 
 public:
@@ -23,13 +23,16 @@ public:
         MessageRole,
         TimeRole,
         IsMyRole,
-        ColorRole
+        FontColorRole,
+        BackColorRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
-    bool isAuth() const     { return m_isAuth; }
+
+    bool isAuth() const { return m_isAuth; }
+    QString nickname() const { return m_nickname; }
 
 public slots:
     void sendPrivateMessage(const QString &reciever, const QString &message) const;
@@ -39,9 +42,11 @@ public slots:
     void leftChat();
 
     void setIsAuth(const bool &isAuth);
+    void setNickname(const QString &nickname);
 
 signals:
     void isAuthChanged(const bool &isAuth);
+    void nicknameChanged(const QString &nickname);
 
 private slots:
     void recievePublicMessage(const QString &sender, const QString &message);
@@ -56,10 +61,8 @@ private slots:
 private:
     void addMessageToList(const MessageItem &msg_item);
 
-    QList <MessageItem> m_messages_list;
-
     QString m_nickname;
-    bool m_isAuth;
-
+    QList <MessageItem> m_messages_list;
     MyTcpClient *tcp_client;
+    bool m_isAuth;
 };

@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include <QString>
+#include <QColor>
 
 struct UserListItem
 {
     UserListItem() : nickname {""}, online {false} { }
-    UserListItem(const QString &nickname, const bool &online) :
-        nickname {nickname}, online {online}
+    UserListItem(const QString &nickname, const QColor color, const bool &online) :
+        nickname {nickname}, color {color}, online {online}
     { }
 
     bool operator==(const UserListItem &item1)
@@ -25,5 +26,6 @@ struct UserListItem
     }
 
     QString nickname;
+    QColor color;
     bool online;
 };
