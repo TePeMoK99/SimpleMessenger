@@ -5,7 +5,9 @@
 
 struct UserListItem
 {
-    UserListItem() : nickname {""}, online {false} { }
+    UserListItem() : nickname {""}, online {false}
+    { }
+
     UserListItem(const QString &nickname, const QColor color, const bool &online) :
         nickname {nickname}, color {color}, online {online}
     { }

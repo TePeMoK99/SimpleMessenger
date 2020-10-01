@@ -6,5 +6,6 @@
         <file>myqmlcomponents/ChatPage.qml</file>
         <file>myqmlcomponents/UsersListPage.qml</file>
         <file>myqmlcomponents/UserBox.qml</file>
+        <file>myqmlcomponents/GroupJoinPage.qml</file>
     </qresource>
 </RCC>

@@ -4,18 +4,27 @@ import QtQuick.Layouts 1.12
 
 Page {
     id: root_page
-//    anchors.fill: parent
 
+    Text {
+        id: login_text
+        anchors.bottom: nickname_field.top
+        anchors.bottomMargin: 15
+        anchors.horizontalCenter: nickname_field.horizontalCenter
+        text: "Sing in"
+        font.pixelSize: 25
+    }
 
     TextField {
         id: nickname_field
         anchors.centerIn: parent
         placeholderText: "Enter your nickname..."
+        text: "Default"
     }
 
     Button {
         id: enter_button
         anchors.top: nickname_field.bottom
+        anchors.topMargin: 15
         anchors.horizontalCenter: nickname_field.horizontalCenter
         text: "Login"
         enabled: nickname_field.length

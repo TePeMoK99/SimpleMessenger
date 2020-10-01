@@ -24,8 +24,8 @@ QVariant UserListModel::data(const QModelIndex &index, int role) const
 
     switch (role)
     {
-    case NicknameRole:  return QVariant(m_users_list[index.row()].nickname);
-    case OnlineRole:    return QVariant(m_users_list[index.row()].online);
+    case NicknameRole: return QVariant(m_users_list[index.row()].nickname);
+    case OnlineRole:   return QVariant(m_users_list[index.row()].online);
     case ColorRole:    return QVariant(m_users_list[index.row()].color);
     }
 
@@ -53,18 +53,19 @@ void UserListModel::setUsersOnline(const int &users_online)
 
 void UserListModel::addUser(const QString &nickname)
 {
-    if (m_users_list.contains(UserListItem(nickname, Qt::transparent, true)))
+    if (m_users_list.contains(UserListItem(nickname, Qt::black, true)))
         return;
 
     emit beginInsertRows(QModelIndex(), 0, 0);
+
     if (nickname == tcp_client->client_name)
         m_users_list.push_front(UserListItem(nickname, Qt::green, true));
     else
-        m_users_list.push_front(UserListItem(nickname, Qt::transparent, true));
+        m_users_list.push_front(UserListItem(nickname, Qt::black, true));
+
     emit endInsertRows();
 
-    m_users_online++;
-    emit usersOnlineChanged(m_users_online);
+    setUsersOnline(m_users_online + 1);
 }
 
 void UserListModel::removeUser(const QString &nickname)
@@ -78,8 +79,8 @@ void UserListModel::removeUser(const QString &nickname)
             emit beginRemoveRows(QModelIndex(), i, i);
             m_users_list.removeAt(i);
             emit endRemoveRows();
-            m_users_online--;
-            emit usersOnlineChanged(m_users_online);
+
+            setUsersOnline(m_users_online - 1);
             break;
         }
     }
@@ -90,7 +91,7 @@ void UserListModel::recieveUsersList(const QStringList &users_list)
     emit beginRemoveRows(QModelIndex(), 0, m_users_list.size() - 1);
     m_users_list.clear();
     emit endRemoveRows();
-    m_users_online = 0;
+    setUsersOnline(0);
 
     for (auto i : users_list)
     {

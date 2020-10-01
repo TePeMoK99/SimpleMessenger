@@ -24,6 +24,6 @@ private:
     MyTcpServer *tcp_server;
     quint16 block_size;
     QString client_name;
+    QString group_name;
     QTcpSocket *tcp_socket;
-    bool isAuth;
 };

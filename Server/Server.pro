@@ -26,6 +26,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    src/grouplistitem.h \
     src/mytcpclient.h \
     src/mytcpserver.h \
     src/types.h

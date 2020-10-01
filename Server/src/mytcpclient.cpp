@@ -4,7 +4,7 @@
 #include <QDataStream>
 
 MyTcpClient::MyTcpClient(const quintptr handle, MyTcpServer *server, QObject *parent) :
-    QObject {parent}, handle {handle}, tcp_server {server}, block_size {0}, client_name {}, isAuth {false}
+    QObject {parent}, handle {handle}, tcp_server {server}, block_size {0}, client_name {}
 {
     tcp_socket = new QTcpSocket(this);
     tcp_socket->setSocketDescriptor(handle);
@@ -22,7 +22,6 @@ void MyTcpClient::socketConnected()
 void MyTcpClient::socketDisconnected()
 {
     tcp_server->removeSocketFromList(client_name);
-    isAuth = false;
     qDebug() << "Socket " << handle << " disconnected";
     deleteLater();
 }
@@ -34,16 +33,13 @@ void MyTcpClient::socketReadyRead()
     if (block_size == 0)
     {
         if (tcp_socket->bytesAvailable() < static_cast<qint64>(sizeof(quint16)))
-        {
             return;
-        }
         data_stream >> block_size;
     }
 
     if (tcp_socket->bytesAvailable() < block_size)
-    {
         return;
-    }
+
     block_size = 0;
 
     quint8 type {};
@@ -58,17 +54,67 @@ void MyTcpClient::socketReadyRead()
 
         qDebug() << "S_Case AUTH_REQUEST " << name;
 
-        if (!tcp_server->isNicknameUsed(name))
+        if (!tcp_server->nicknameUsed(name))
         {
             client_name = name;
-            isAuth = true;
-            tcp_server->sendAuthSuccess(client_name);
-            tcp_server->sendMessageUserJoin(client_name);
+            tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::AUTH_SUCCESS, {client_name}));
         }
         else
         {
-            tcp_server->sendAuthFail(client_name);
+            tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::AUTH_FAIL, {client_name}));
         }
+
+        break;
+    }
+    case MessageTypes::JOIN_GROUP_REQUEST:
+    {
+        qDebug() << "S_Case JOIN_GROUP_REQUEST";
+        QString group {};
+        QString password {};
+        data_stream >> group;
+        data_stream >> password;
+
+        if (!tcp_server->groupExist(group))
+        {
+            tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::JOIN_GROUP_FAIL, {"Group doesn't exist"}));
+        }
+        else if (!tcp_server->checkGroupPassword(group, password))
+        {
+            tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::JOIN_GROUP_FAIL, {"Wrong password"}));
+        }
+        else
+        {
+            group_name = group;
+            tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::JOIN_GROUP_SUCCESS, {group_name}));
+            tcp_server->sendMessageUserJoin(group_name, client_name);
+        }
+
+        break;
+    }
+    case MessageTypes::LEFT_GROUP:
+    {
+        qDebug() << "S_Case LEFT_GROUP";
+        tcp_server->sendMessageUserLeft(group_name, client_name);
+        tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::JOIN_GROUP_FAIL, {"Left group"}));
+        group_name = "";
+
+        break;
+    }
+    case MessageTypes::CREATE_GROUP_REQUEST:
+    {
+        qDebug() << "S_Case CREATE_GROUP_REQUEST";
+        QString group {};
+        QString password {};
+        data_stream >> group;
+        data_stream >> password;
+
+        if (tcp_server->groupExist(group))
+        {
+            tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::CREATE_GROUP_FAIL, {"Group name already used"}));
+            break;
+        }
+        tcp_server->createGroup(group, password);
+        tcp_socket->write(MyTcpServer::makeByteArray(MessageTypes::CREATE_GROUP_SUCCESS, {group}));
 
         break;
     }
@@ -78,7 +124,7 @@ void MyTcpClient::socketReadyRead()
         QString message {};
         data_stream >> message;
 
-        tcp_server->sendMessageToAll(message, client_name);
+        tcp_server->sendMessageToAll(group_name, message, client_name);
 
         break;
     }
@@ -90,7 +136,7 @@ void MyTcpClient::socketReadyRead()
         data_stream >> reciever;
         data_stream >> message;
 
-        tcp_server->sendMessageToUser(message, reciever, client_name);
+        tcp_server->sendMessageToUser(group_name, message, reciever, client_name);
 
         break;
     }
@@ -99,18 +145,16 @@ void MyTcpClient::socketReadyRead()
         qDebug() << "S_Case USER_JOIN";
         QString name {};
         data_stream >> name;
-
-        tcp_server->sendMessageUserJoin(name);
+        tcp_server->sendMessageUserJoin(group_name, name);
 
         break;
     }
     case MessageTypes::USER_LEFT:
     {
         qDebug() << "S_Case USER_LEFT";
-        QString name {};
-        data_stream >> name;
-        // TODO: передать всем остальным, что пользователь вышел
-        tcp_server->sendMessageUserLeft(name);
+        QString sender {};
+        data_stream >> sender;
+        tcp_server->sendMessageUserLeft(group_name, sender);
 
         break;
     }
@@ -119,7 +163,7 @@ void MyTcpClient::socketReadyRead()
         QString reciever {};
         data_stream >> reciever;
         qDebug() << "S_Case USERS_LIST_REQUEST";
-        tcp_server->sendUsersList(reciever);
+        tcp_server->sendUsersList(group_name, reciever);
 
         break;
     }

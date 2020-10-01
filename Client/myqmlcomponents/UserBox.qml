@@ -5,7 +5,8 @@ RowLayout {
     id: root_row
     property string nickname: ""
     property string color: ""
-    width: parent.width
+
+    Layout.fillWidth: true
 
     Text {
         Layout.alignment: Qt.AlignLeft

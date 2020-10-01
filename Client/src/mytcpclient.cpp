@@ -8,8 +8,8 @@
 MyTcpClient::MyTcpClient() : client_name {"Default"}, block_size {0}
 {
     tcp_socket = new QTcpSocket(this);
-    connect(tcp_socket, &QTcpSocket::readyRead, this, &MyTcpClient::socketReadyRead);
-    connect(tcp_socket, &QTcpSocket::connected, this, &MyTcpClient::socketConnected);
+    connect(tcp_socket, &QTcpSocket::readyRead,    this, &MyTcpClient::socketReadyRead);
+    connect(tcp_socket, &QTcpSocket::connected,    this, &MyTcpClient::socketConnected);
     connect(tcp_socket, &QTcpSocket::disconnected, this, &MyTcpClient::socketDisconnected);
 }
 
@@ -49,16 +49,29 @@ QByteArray MyTcpClient::makeByteArray(const int &msg_type, const QStringList &pa
 
 void MyTcpClient::joinChat(const QString &host, const int &port, const QString &nickname)
 {
-    client_name = nickname;
     tcp_socket->connectToHost(host, port);
-    tcp_socket->write(makeByteArray(MessageTypes::AUTH_REQUEST, {client_name}));
+    tcp_socket->write(makeByteArray(MessageTypes::AUTH_REQUEST, {nickname}));
 }
 
 void MyTcpClient::leftChat()
 {
     socketDisconnected();
+    emit authFail();
+}
 
-    emit userAuthFail();
+void MyTcpClient::joinGroup(const QString &group, const QString &password)
+{
+    tcp_socket->write(makeByteArray(MessageTypes::JOIN_GROUP_REQUEST, {group, password}));
+}
+
+void MyTcpClient::leftGroup()
+{
+    tcp_socket->write(makeByteArray(MessageTypes::LEFT_GROUP, {}));
+}
+
+void MyTcpClient::createGroup(const QString &group, const QString &password)
+{
+    tcp_socket->write(makeByteArray(MessageTypes::CREATE_GROUP_REQUEST, {group, password}));
 }
 
 void MyTcpClient::socketReadyRead()
@@ -67,17 +80,15 @@ void MyTcpClient::socketReadyRead()
 
     if (block_size == 0)
     {
-        if (tcp_socket->bytesAvailable() < static_cast<qint64>(sizeof(quint16)))
-        {
+        if (tcp_socket->bytesAvailable() < static_cast<qint64>(sizeof(quint16)))        
             return;
-        }
+
         data_stream >> block_size;
     }
 
     if (tcp_socket->bytesAvailable() < block_size)
-    {
         return;
-    }
+
     block_size = 0;
 
     quint8 type {};
@@ -87,16 +98,52 @@ void MyTcpClient::socketReadyRead()
     {
     case MessageTypes::AUTH_SUCCESS:
     {
-        qDebug() << "C_Case AUTH_SUCCESS";        
-        emit userAuthSuccess();
-        tcp_socket->write(makeByteArray(MessageTypes::USERS_LIST_REQUEST, {client_name}));
+        qDebug() << "C_Case AUTH_SUCCESS";
+        data_stream >> client_name;
+        emit authSuccess(client_name);
 
         break;
     }
     case MessageTypes::AUTH_FAIL:
     {
         qDebug() << "C_Case AUTH_FAIL";
-        emit userAuthFail();
+        emit authFail();
+
+        break;
+    }
+    case MessageTypes::JOIN_GROUP_SUCCESS:
+    {
+        qDebug() << "C_Case JOIN_GROUP_SUCCESS";
+        data_stream >> group_name;
+        emit joinGroupSuccess(group_name);
+        tcp_socket->write(makeByteArray(MessageTypes::USERS_LIST_REQUEST, {client_name}));
+
+        break;
+    }
+    case MessageTypes::JOIN_GROUP_FAIL:
+    {
+        qDebug() << "C_Case JOIN_GROUP_FAIL";
+        QString error {};
+        data_stream >> error;
+        emit joinGroupFail(error);
+
+        break;
+    }
+    case MessageTypes::CREATE_GROUP_SUCCESS:
+    {
+        qDebug() << "C_Case CREATE_GROUP_SUCCESS";
+        data_stream >> group_name;
+        emit joinGroupSuccess(group_name);
+        tcp_socket->write(makeByteArray(MessageTypes::USERS_LIST_REQUEST, {client_name}));
+
+        break;
+    }
+    case MessageTypes::CREATE_GROUP_FAIL:
+    {
+        qDebug() << "C_Case CREATE_GROUP_FAIL";
+        QString error {};
+        data_stream >> error;
+        emit joinGroupFail(error);
 
         break;
     }
@@ -134,7 +181,6 @@ void MyTcpClient::socketReadyRead()
         QString sender {};
         data_stream >> sender;
         data_stream >> message;
-
         emit publicMessageRecieved(sender, message);
 
         break;
@@ -162,6 +208,5 @@ void MyTcpClient::socketDisconnected()
 {
     tcp_socket->write(makeByteArray(MessageTypes::USER_LEFT, {client_name}));
     client_name = "";
-//    Sleep(250);
     tcp_socket->disconnectFromHost();
 }

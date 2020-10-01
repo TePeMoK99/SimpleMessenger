@@ -12,11 +12,13 @@ Page {
 
     Button {
         id: exit_button
-        anchors.right: parent.right
+        anchors.left: parent.left
         anchors.top: parent.top
-        text: "X"
+        anchors.topMargin: 50
+        text: "Left group"
+        z: 5
 
-        onClicked: chat_model.leftChat()
+        onClicked: chat_model.leftGroup()
     }
 
     Text {
@@ -30,7 +32,7 @@ Page {
 
     Text {
         id: roomname_text
-        text: "Room: 09-841 v.1"
+        text: "Room: " + chat_model.group
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 20
@@ -48,7 +50,7 @@ Page {
             id: roomname_mousearea
             anchors.fill: parent
 
-            onClicked: swipe_view.setCurrentIndex(2)
+            onClicked: swipe_view.incrementCurrentIndex()
         }
     }
 
@@ -112,7 +114,7 @@ Page {
             model: users_model
 
             delegate: Rectangle {
-                visible: nickname_ != chat_model.nickname
+                visible: nickname_ !== chat_model.nickname
                 height: 40
                 width: parent.width
                 color: delegate_mousearea.containsMouse ? "lightgray" : "transparent"
@@ -137,7 +139,6 @@ Page {
                     }
                 }
             }
-
         }
 
         Rectangle {
@@ -158,7 +159,7 @@ Page {
                         chat_model.sendPublicMessage(text_input.text)
                     else if (reciever_select.selectedNickname.length > 0)
                         chat_model.sendPrivateMessage(reciever_select.selectedNickname, text_input.text)
-                    nickname_text.text = chat_model.nickName
+
                     text_input.text = ""
                 }
             }

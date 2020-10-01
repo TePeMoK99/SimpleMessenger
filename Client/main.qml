@@ -16,7 +16,22 @@ ApplicationWindow {
         id:  chat_model
 
         onIsAuthChanged: {
-            if (isAuth) {
+            if (isAuth && isJoined) {
+                swipe_view.setCurrentIndex(2)
+            }
+            else if (isAuth && !isJoined) {
+                swipe_view.setCurrentIndex(1)
+            }
+            else {
+                swipe_view.setCurrentIndex(0)
+            }
+        }
+
+        onIsJoinedChanged: {
+            if (isAuth && isJoined) {
+                swipe_view.setCurrentIndex(2)
+            }
+            else if (isAuth && !isJoined) {
                 swipe_view.setCurrentIndex(1)
             }
             else {
@@ -37,6 +52,10 @@ ApplicationWindow {
         interactive: false
 
         LoginPage {
+
+        }
+
+        GroupJoinPage {
 
         }
 

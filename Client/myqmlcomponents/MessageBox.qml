@@ -10,7 +10,7 @@ RowLayout {
     property string backColor: ""
     property bool isMy: false
 
-    width: parent.width
+    Layout.fillWidth: true
 
     Rectangle {
         id: root_rect
@@ -47,7 +47,7 @@ RowLayout {
 
             text: root_row.sender
             font.underline: true
-            font.pixelSize: 10
+            font.pixelSize: 12
             color: "gray"
         }
 
