@@ -61,7 +61,6 @@ void MyTcpClient::leftChat()
 
 void MyTcpClient::joinGroup(const QString &group, const QString &password)
 {
-    qDebug() << group << password;
     tcp_socket->write(makeByteArray(MessageTypes::JOIN_GROUP_REQUEST, {group, password}));
 }
 

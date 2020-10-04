@@ -15,25 +15,32 @@ class MyTcpServer : public QTcpServer
 
 public:
     MyTcpServer();
+    ~MyTcpServer()
+    {
+        qDebug() << "removed";
+    }
 
     bool start(const QHostAddress &address, const int &port);
     bool start(const QString &address_str, const int &port);
 
-    void sendMessageToUser(const QString &group_name, const QString &message, const QString &reciever, const QString &sender) const;
-    void sendMessageToAll(const QString &group_name, const QString &message, const QString &sender) const;
+    // Methods for sending messages:
+    void sendMsgToUser(const QString &group_name, const QString &message,
+                       const QString &reciever, const QString &sender) const;
+    void sendMsgToAll(const QString &group_name, const QString &message, const QString &sender) const;
+    void sendMsgUserJoin(const QString &group_name, const QString &new_user) const;
+    void sendMsgUserLeft(const QString &group_name, const QString &user) const;
 
-    void sendMessageUserJoin(const QString &group_name, const QString &new_user) const;
-    void sendMessageUserLeft(const QString &group_name, const QString &user) const;
-
-    void sendAuthSuccess(const QString &reciever) const;
-    void sendAuthFail(const QString &reciever) const;
     void sendUsersList(const QString &group_name, const QString &reciever) const;
 
     void createGroup(const QString &group_name, const QString &password);
+    void addClient(const QString &client_name, const quintptr &handle);
+    void moveClient(const QString &client_name, QString &from, const QString &to);
+    void removeClient(const QString &group_name, const QString &client_name);
+
     bool nicknameUsed(const QString &nickname) const;
     bool groupExist(const QString &group_name) const;
     bool checkGroupPassword(const QString &group_name, const QString &password) const;
-    void removeSocketFromList(const QString &client_name);
+
 
     static QByteArray makeByteArray(const int &msg_type, const QStringList &params);
 
@@ -42,6 +49,6 @@ private slots:
 
 private:
     QTcpSocket *socket;
-    QList<MyTcpClient*> clients_list;
-    QList<GroupListItem> groups_list;
+    QHash<QString, GroupListItem> groups;
+    QHash<quintptr, MyTcpClient*> handles_list;
 };

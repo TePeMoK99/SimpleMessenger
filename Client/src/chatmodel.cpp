@@ -1,6 +1,7 @@
 ﻿#include "chatmodel.h"
 #include "types.h"
 #include <QTime>
+#include <thread>
 
 ChatModel::ChatModel(QObject *parent)
     : QAbstractListModel {parent}, m_isAuth {false}, m_isJoined {false}
@@ -87,8 +88,14 @@ void ChatModel::createGroup(const QString &group_name, const QString &password)
 
 void ChatModel::sendPublicMessage(const QString &message)
 {
+    //    for (int i = 0; i < 10000; i++)
+    //    {
+    //        tcp_client->sendPublicMessage(message + " " + QString::number(i));
+    //        addMessageToList(MessageItem("You", message + " " + QString::number(i), Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
+    //    }
     tcp_client->sendPublicMessage(message);
     addMessageToList(MessageItem("You", message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
+
 }
 
 void ChatModel::sendPrivateMessage(const QString &reciever, const QString &message)
@@ -151,10 +158,19 @@ void ChatModel::joinGroupFail(const QString &error)
 }
 
 void ChatModel::addMessageToList(const MessageItem &msg_item)
-{
+{ 
     emit beginInsertRows(QModelIndex(), 0, 0);
 
     m_messages_list.push_front(msg_item);
 
     emit endInsertRows();
+
+    const int size {m_messages_list.size()};
+
+    if (size > 100)
+    {
+        emit beginRemoveRows(QModelIndex(), size - 1, size - 1);
+        m_messages_list.pop_back();
+        emit endRemoveRows();
+    }
 }

@@ -4,8 +4,8 @@
 
 MyTcpServer::MyTcpServer()
 {
-    groups_list.push_back(GroupListItem("Main", "0000"));
-    groups_list.push_back(GroupListItem("Main1", "1234"));
+    groups.insert("None", GroupListItem());
+    groups.insert("Main", GroupListItem("Main", "0000"));
 }
 
 bool MyTcpServer::start(const QHostAddress &address, const int &port)
@@ -33,115 +33,77 @@ bool MyTcpServer::start(const QString &address_str, const int &port)
     return true;
 }
 
-void MyTcpServer::sendMessageToAll(const QString &group_name, const QString &message, const QString &sender) const
+void MyTcpServer::sendMsgToAll(const QString &group_name, const QString &message, const QString &sender) const
 {
     const QByteArray data {makeByteArray(MessageTypes::PUBLIC_MESSAGE, {sender, message})};
 
-    for (auto i : clients_list)
+    for (auto i : groups[group_name].clients)
     {
-        if (i->client_name != sender && i->group_name == group_name)
+        if (i->client_name != sender)
             i->tcp_socket->write(data);
     }
-    qDebug() << "Message [" << message << "] from " << sender << "sent to all";
+    qDebug() << "Group [" << group_name << "] Message [" << message << "] from " << sender << "sent to all";
 }
 
-void MyTcpServer::sendMessageToUser(const QString &group_name, const QString &message, const QString &reciever, const QString &sender) const
+void MyTcpServer::sendMsgToUser(const QString &group_name, const QString &message,
+                                    const QString &reciever, const QString &sender) const
 {
     const QByteArray data {makeByteArray(MessageTypes::PRIVATE_MESSAGE, {sender, message})};
 
-    for (auto i : clients_list)
-    {
-        if (i->client_name == reciever && i->group_name == group_name)
-        {
-            i->tcp_socket->write(data);
-            break;
-        }
-    }
-    qDebug() << "Message [" << message << "] from " << sender << "sent to " << reciever;
+    groups[group_name].clients[reciever]->tcp_socket->write(data);
+
+
+    qDebug() << "Group [" << group_name << "] Message [" << message << "] from " << sender << "sent to " << reciever;
 }
 
-void MyTcpServer::sendMessageUserJoin(const QString &group_name, const QString &new_user) const
+void MyTcpServer::sendMsgUserJoin(const QString &group_name, const QString &new_user) const
 {
     const QByteArray data {makeByteArray(MessageTypes::USER_JOIN, {new_user})};
 
-    for (auto i : clients_list)
+    for (auto i : groups[group_name].clients)
     {
-        if (i->client_name != new_user && i->group_name == group_name)
+        if (i->client_name != new_user)
             i->tcp_socket->write(data);
     }
 }
 
-void MyTcpServer::sendMessageUserLeft(const QString &group_name, const QString &user) const
+void MyTcpServer::sendMsgUserLeft(const QString &group_name, const QString &user) const
 {
     const QByteArray data {makeByteArray(MessageTypes::USER_LEFT, {user})};
 
-    for (auto i : clients_list)
+    for (auto i : groups[group_name].clients)
     {
-        if (i->client_name != user && i->group_name == group_name)
+        if (i->client_name != user)
             i->tcp_socket->write(data);
     }
 }
 
 void MyTcpServer::sendUsersList(const QString &group_name, const QString &reciever) const
 {
-    QString users_str {""};
-    for (auto i : clients_list)
+    QString users_str {""}; // name1,name2,...
+    for (auto i : groups[group_name].clients)
     {
-        if (i->group_name == group_name)
-            users_str += i->client_name + ",";
+        users_str += i->client_name + ",";
     }
 
     users_str.remove(users_str.length() - 1, 1);
-
     const QByteArray data {makeByteArray(MessageTypes::USERS_LIST, {users_str})};
-
-    for (auto i : clients_list)       
-    {
-        if (i->client_name == reciever && i->group_name == group_name)
-        {
-            i->tcp_socket->write(data);
-            break;
-        }
-    }
+    qDebug() << groups[group_name].clients.keys();
+    groups[group_name].clients[reciever]->tcp_socket->write(data);
 }
 
 void MyTcpServer::createGroup(const QString &group_name, const QString &password)
 {
-    groups_list.append(GroupListItem(group_name, password));
+    groups.insert(group_name, GroupListItem(group_name, password));
     qDebug() << "Group" << group_name << "with password" << password << "created";
-}
-
-void MyTcpServer::sendAuthSuccess(const QString &reciever) const
-{
-    const QByteArray data {makeByteArray(MessageTypes::AUTH_SUCCESS, {reciever})};
-
-    for (auto i : clients_list)
-    {
-        if (i->client_name == reciever)
-        {
-            i->tcp_socket->write(data);
-            break;
-        }
-    }
-}
-
-void MyTcpServer::sendAuthFail(const QString &reciever) const
-{
-    const QByteArray data {makeByteArray(MessageTypes::AUTH_FAIL, {})};
-
-    for (auto i : clients_list)
-    {
-        if (i->client_name == reciever)        
-            i->tcp_socket->write(data);        
-    }
 }
 
 bool MyTcpServer::nicknameUsed(const QString &nickname) const
 {
-    for (auto i : clients_list)
+    for (auto i : groups)
     {
-        if (i->client_name == nickname)        
-            return true;        
+        if (i.clients.contains(nickname))
+            return true;
     }
 
     return false;
@@ -149,44 +111,31 @@ bool MyTcpServer::nicknameUsed(const QString &nickname) const
 
 bool MyTcpServer::groupExist(const QString &group_name) const
 {
-    for (auto i : groups_list)
-    {
-        if (i.group_name == group_name)
-            return true;
-    }
-
-    return false;
+    return groups.contains(group_name);
 }
 
 bool MyTcpServer::checkGroupPassword(const QString &group_name, const QString &password) const
 {
-    for (auto i : groups_list)
-    {
-        if (i.group_name == group_name)
-        {
-            if (i.password == password)
-                return true;
-            return false;
-        }
-    }
-
-    return false;
+    return groups[group_name].password == password;
 }
 
-void MyTcpServer::removeSocketFromList(const QString &client_name)
+void MyTcpServer::removeClient(const QString &group_name, const QString &client_name)
 {
-    const int size {clients_list.size()};
-    int index {};
+    groups[group_name].clients.remove(client_name);
+}
 
-    for (int i = 0; i < size; i++)
-    {
-        if (clients_list[i]->client_name == client_name)
-        {
-            index = i;
-            clients_list.removeAt(index);
-            break;
-        }
-    }
+void MyTcpServer::addClient(const QString &client_name, const quintptr &handle)
+{
+    groups["None"].clients.insert(client_name, std::move(handles_list[handle]));
+    handles_list.remove(handle);
+}
+
+void MyTcpServer::moveClient(const QString &client_name, QString &from, const QString &to)
+{
+    groups[to].clients.insert(client_name, std::move(groups[from].clients[client_name]));
+    groups[from].clients.remove(client_name);
+    qDebug() << client_name << "moved from" << from << "to" << to;
+    from = to;
 }
 
 QByteArray MyTcpServer::makeByteArray(const int &msg_type, const QStringList &params)
@@ -195,8 +144,8 @@ QByteArray MyTcpServer::makeByteArray(const int &msg_type, const QStringList &pa
     QDataStream data_stream(&data, QIODevice::WriteOnly);
     data_stream << quint16(0) << quint8(msg_type);
 
-    for (auto i : params)    
-        data_stream << i;    
+    for (auto i : params)
+        data_stream << i;
 
     data_stream.device()->seek(0);
     data_stream << static_cast<quint16>(data.size() - sizeof(quint16));
@@ -208,6 +157,5 @@ void MyTcpServer::incomingConnection(const qintptr handle)
 {
     MyTcpClient *new_client = new MyTcpClient(handle, this);
     qDebug() << "Client " << handle << " connected";
-    clients_list.append(new_client);
-    qDebug() << clients_list;
+    handles_list.insert(handle, new_client);
 }

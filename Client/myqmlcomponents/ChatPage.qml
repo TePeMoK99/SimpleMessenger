@@ -158,7 +158,9 @@ Page {
                     if (message_type_select.currentIndex == 0)
                         chat_model.sendPublicMessage(text_input.text)
                     else if (reciever_select.selectedNickname.length > 0)
-                        chat_model.sendPrivateMessage(reciever_select.selectedNickname, text_input.text)
+                        chat_model.sendPrivateMessage(users_model.getUserHandle(reciever_select.selectedNickname),
+                                                      reciever_select.selectedNickname,
+                                                      text_input.text)
 
                     text_input.text = ""
                 }

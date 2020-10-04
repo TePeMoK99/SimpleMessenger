@@ -1,14 +1,20 @@
 ﻿#pragma once
 
 #include <QStringList>
+#include "mytcpclient.h"
+
+class MyTcpClient;
 
 struct GroupListItem
 {
-    GroupListItem(const QString &name, const QString &password) :
-        group_name {name}, password {password}
+    GroupListItem() : name {"None"}, password {""}, clients {}
     { }
 
-    QString group_name;
+    GroupListItem(const QString &name, const QString &password) :
+        name {name}, password {password}
+    { }
+
+    QString name;
     QString password;
-    QStringList client_list;
+    QHash<QString, MyTcpClient*> clients;
 };

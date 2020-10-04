@@ -18,7 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         src/mytcpclient.cpp \
-        src/mytcpserver.cpp
+        src/mytcpserver.cpp \
+        src/qthreadpooltask.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -29,4 +30,5 @@ HEADERS += \
     src/grouplistitem.h \
     src/mytcpclient.h \
     src/mytcpserver.h \
+    src/qthreadpooltask.h \
     src/types.h
