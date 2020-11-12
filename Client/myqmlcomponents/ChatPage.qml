@@ -59,6 +59,14 @@ Page {
         }
     }
 
+    Text {
+        id: users_count
+        text: "Users online: " + users_model.usersOnline
+        anchors.horizontalCenter: users_list_text.horizontalCenter
+        anchors.top: users_list_text.bottom
+        anchors.topMargin: 5
+    }
+
     ListView {
         id: list_view
         anchors.fill: parent

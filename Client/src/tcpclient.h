@@ -33,7 +33,7 @@ private slots:
 
 signals:
     void publicMsgRecieved (QString sender, QString message);
-    void privateMsgRecieved(QString sender, QString message);
+    void privateMsgRecieved(QString sender, QString reciever, QString message);
 
     void userJoinRecieved(QString sender);
     void userLeftRecieved(QString sender);
