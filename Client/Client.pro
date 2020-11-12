@@ -16,7 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         src/chatmodel.cpp \
-        src/mytcpclient.cpp \
+        src/tcpclient.cpp \
         src/userlistmodel.cpp
 
 RESOURCES += qml.qrc
@@ -35,7 +35,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     src/chatmodel.h \
     src/messageitem.h \
-    src/mytcpclient.h \
+    src/tcpclient.h \
     src/types.h \
     src/userlistitem.h \
     src/userlistmodel.h

@@ -16,9 +16,13 @@ Page {
         anchors.top: parent.top
         anchors.topMargin: 50
         text: "Left group"
-        z: 5
+        z: 5       
 
-        onClicked: chat_model.leftGroup()
+        onClicked: {
+            message_type_select.currentIndex = 0
+            chat_model.leaveGroup()
+            text_input.clear()
+        }
     }
 
     Text {
@@ -43,14 +47,15 @@ Page {
         text: "Users list"
         anchors.top: roomname_text.bottom
         anchors.horizontalCenter: roomname_text.horizontalCenter
-        font.pixelSize: 15
+        font.pixelSize: roomname_mousearea.pressed ? 17 : 15
         font.bold: roomname_mousearea.containsMouse
 
         MouseArea {
             id: roomname_mousearea
             anchors.fill: parent
+            hoverEnabled: true
 
-            onClicked: swipe_view.incrementCurrentIndex()
+            onClicked: stack_view.push("UsersListPage.qml")
         }
     }
 
@@ -114,8 +119,7 @@ Page {
             model: users_model
 
             delegate: Rectangle {
-                visible: nickname_ !== chat_model.nickname
-                height: 40
+                height: 50
                 width: parent.width
                 color: delegate_mousearea.containsMouse ? "lightgray" : "transparent"
 
@@ -123,8 +127,10 @@ Page {
                     id: nickname_field
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: 5
-                    text: nickname_
+                    anchors.leftMargin: 15
+
+                    color: color_
+                    text: nickname_ == chat_model.nickname ? "You" : nickname_
                     font.pixelSize: 14
                 }
 
@@ -136,6 +142,7 @@ Page {
                     onClicked: {
                         reciever_select.selectedNickname = nickname_field.text
                         reciever_select.displayText = nickname_field.text
+                        reciever_select.update()
                     }
                 }
             }
@@ -156,11 +163,10 @@ Page {
 
                 onPressed: {
                     if (message_type_select.currentIndex == 0)
-                        chat_model.sendPublicMessage(text_input.text)
+                        chat_model.sendPublicMsg(text_input.text)
+
                     else if (reciever_select.selectedNickname.length > 0)
-                        chat_model.sendPrivateMessage(users_model.getUserHandle(reciever_select.selectedNickname),
-                                                      reciever_select.selectedNickname,
-                                                      text_input.text)
+                        chat_model.sendPrivateMsg(reciever_select.selectedNickname, text_input.text)
 
                     text_input.text = ""
                 }

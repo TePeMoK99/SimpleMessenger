@@ -11,7 +11,7 @@ Page {
         text: "Back"
 
         onClicked: {
-            swipe_view.decrementCurrentIndex()
+            stack_view.pop()
         }
     }
 

@@ -16,25 +16,31 @@ ApplicationWindow {
 
         onIsAuthChanged: {
             if (isAuth && isJoined) {
-                swipe_view.setCurrentIndex(2)
+                stack_view.clear()
+                stack_view.push("myqmlcomponents/ChatPage.qml")
             }
             else if (isAuth && !isJoined) {
-                swipe_view.setCurrentIndex(1)
+                stack_view.clear()
+                stack_view.push("myqmlcomponents/GroupJoinPage.qml")
             }
             else {
-                swipe_view.setCurrentIndex(0)
+                stack_view.clear()
+                stack_view.push("myqmlcomponents/LoginPage.qml")
             }
         }
 
         onIsJoinedChanged: {
             if (isAuth && isJoined) {
-                swipe_view.setCurrentIndex(2)
+                stack_view.clear()
+                stack_view.push("myqmlcomponents/ChatPage.qml")
             }
             else if (isAuth && !isJoined) {
-                swipe_view.setCurrentIndex(1)
+                stack_view.clear()
+                stack_view.push("myqmlcomponents/GroupJoinPage.qml")
             }
             else {
-                swipe_view.setCurrentIndex(0)
+                stack_view.clear()
+                stack_view.push("myqmlcomponents/LoginPage.qml")
             }
         }
     }
@@ -43,27 +49,10 @@ ApplicationWindow {
         id: users_model
     }
 
-    SwipeView {
-        id: swipe_view
+    StackView {
+        id: stack_view
         anchors.fill: parent
         clip: false
-        orientation: Qt.Horizontal
-        interactive: false
-
-        LoginPage {
-
-        }
-
-        GroupJoinPage {
-
-        }
-
-        ChatPage {
-
-        }
-
-        UsersListPage {
-
-        }
+        initialItem: LoginPage {}
     }
 }

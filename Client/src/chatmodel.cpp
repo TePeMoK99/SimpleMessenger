@@ -1,21 +1,21 @@
 ﻿#include "chatmodel.h"
 #include "types.h"
-#include <QTime>
-#include <thread>
 
 ChatModel::ChatModel(QObject *parent)
     : QAbstractListModel {parent}, m_isAuth {false}, m_isJoined {false}
 {
-    tcp_client = MyTcpClient::instance();
-    connect(tcp_client, &MyTcpClient::authSuccess,      this, &ChatModel::authSuccess);
-    connect(tcp_client, &MyTcpClient::authFail,         this, &ChatModel::authFail);
-    connect(tcp_client, &MyTcpClient::joinGroupSuccess, this, &ChatModel::joinGroupSuccess);
-    connect(tcp_client, &MyTcpClient::joinGroupFail,    this, &ChatModel::joinGroupFail);
-
-    connect(tcp_client, &MyTcpClient::userJoinRecieved,       this, &ChatModel::recieveUserJoin);
-    connect(tcp_client, &MyTcpClient::userLeftRecieved,       this, &ChatModel::recieveUserLeft);
-    connect(tcp_client, &MyTcpClient::publicMessageRecieved,  this, &ChatModel::recievePublicMessage);
-    connect(tcp_client, &MyTcpClient::privateMessageRecieved, this, &ChatModel::recievePrivateMessage);
+    client = TCPClient::instance();
+    connect(client, &TCPClient::publicMsgRecieved, this, &ChatModel::onPublicMessageRecieved);
+    connect(client, &TCPClient::privateMsgRecieved, this, &ChatModel::onPrivateMessageRecieved);
+    connect(client, &TCPClient::userJoinRecieved, this, &ChatModel::onUserJoinRecieved);
+    connect(client, &TCPClient::userLeftRecieved, this, &ChatModel::onUserLeftRecieved);
+    connect(client, &TCPClient::authSuccess, this, &ChatModel::onAuthSuccess);
+    connect(client, &TCPClient::registerSuccess, this, &ChatModel::onRegisterSuccess);
+    connect(client, &TCPClient::authFail, this, &ChatModel::onAuthFail);
+    connect(client, &TCPClient::registerFail, this, &ChatModel::onRegisterFail);
+    connect(client, &TCPClient::joinGroupSuccess, this, &ChatModel::onJoinGroupSuccess);
+    connect(client, &TCPClient::joinGroupFail, this, &ChatModel::onJoinGroupFail);
+    connect(client, &TCPClient::leaveGroupSuccess, this, &ChatModel::onLeaveGroupSuccess);
 }
 
 int ChatModel::rowCount(const QModelIndex &parent) const
@@ -57,74 +57,96 @@ QHash<int, QByteArray> ChatModel::roleNames() const
     return roles;
 }
 
-void ChatModel::joinChat(const QString &nickname)
-{
-    tcp_client->joinChat("127.0.0.1", 11111, nickname);
-}
-
-void ChatModel::leftChat()
-{
-    tcp_client->leftChat();
-}
-
-void ChatModel::joinGroup(const QString &group_name, const QString &password)
-{
-    tcp_client->joinGroup(group_name, password);
-}
-
-void ChatModel::leftGroup()
+void ChatModel::leaveGroup()
 {
     emit beginRemoveRows(QModelIndex(), 0, m_messages_list.size() - 1);
     m_messages_list.clear();
     emit endRemoveRows();
 
-    tcp_client->leftGroup();
+    client->leaveGroup();
 }
 
 void ChatModel::createGroup(const QString &group_name, const QString &password)
 {
-    tcp_client->createGroup(group_name, password);
+    client->createGroup(group_name, hashPassword(password));
 }
 
-void ChatModel::sendPublicMessage(const QString &message)
+void ChatModel::joinGroup(const QString &group_name, const QString &password)
 {
-    //    for (int i = 0; i < 10000; i++)
-    //    {
-    //        tcp_client->sendPublicMessage(message + " " + QString::number(i));
-    //        addMessageToList(MessageItem("You", message + " " + QString::number(i), Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
-    //    }
-    tcp_client->sendPublicMessage(message);
-    addMessageToList(MessageItem("You", message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
-
+    client->joinGroup(group_name, hashPassword(password));
 }
 
-void ChatModel::sendPrivateMessage(const QString &reciever, const QString &message)
+void ChatModel::signUp(const QString &nickname, const QString &password)
 {
-    tcp_client->sendPrivateMessage(reciever, message);
-    addMessageToList(MessageItem("You to " + reciever, message, Qt::black, "#80D4FF", true, QTime::currentTime().toString("HH:mm")));
+    client->singUp(QHostAddress::LocalHost, 12345, nickname, hashPassword(password));
+    //    client->singUp(QHostAddress::LocalHost, 12345, nickname, password);
 }
 
-void ChatModel::recievePublicMessage(const QString &sender, const QString &message)
+void ChatModel::signIn(const QString &nickname, const QString &password)
 {
-    addMessageToList(MessageItem("From " + sender, message, Qt::black, "#90EE90", false, QTime::currentTime().toString("HH:mm")));
+    client->signIn(QHostAddress::LocalHost, 12345, nickname, hashPassword(password));
 }
 
-void ChatModel::recievePrivateMessage(const QString &sender, const QString &message)
+void ChatModel::signOut()
 {
-    addMessageToList(MessageItem("From " + sender + " to you", message, Qt::black, "#FFB319", false, QTime::currentTime().toString("HH:mm")));
+    client->signOut();
 }
 
-void ChatModel::recieveUserJoin(const QString &sender)
+void ChatModel::sendPublicMsg(const QString &message)
 {
-    addMessageToList(MessageItem("", sender + " join chat", Qt::darkGreen, Qt::lightGray, false, QTime::currentTime().toString("HH:mm")));
+    client->sendPublicMsg(message);
+    //
+    //
 }
 
-void ChatModel::recieveUserLeft(const QString &sender)
+void ChatModel::sendPrivateMsg(const QString &reciever, const QString &message)
 {
-    addMessageToList(MessageItem("", sender + " left chat", Qt::darkRed, Qt::lightGray, false, QTime::currentTime().toString("HH:mm")));
+    client->sendPrivateMsg(reciever, message);
+    //
+    //
 }
 
-void ChatModel::authSuccess(const QString &nickname)
+void ChatModel::onPublicMessageRecieved(QString sender, QString message)
+{
+    if (sender != m_nickname)
+    {
+        addMsgToList(MessageItem("From " + sender, message, Qt::black, "#90EE90",
+                                 false, QTime::currentTime().toString("HH:mm")));
+    }
+    else
+    {
+        addMsgToList(MessageItem("You", message, Qt::black, "#80D4FF",
+                                 true, QTime::currentTime().toString("HH:mm")));
+    }
+}
+
+void ChatModel::onPrivateMessageRecieved(QString sender, QString reciever, QString message)
+{
+    if (sender != m_nickname)
+    {
+        addMsgToList(MessageItem("From " + sender + " to you", message, Qt::black, "#FFB319",
+                                 false, QTime::currentTime().toString("HH:mm")));
+    }
+    else
+    {
+        addMsgToList(MessageItem("You to " + reciever, message, Qt::black, "#80D4FF",
+                                 true, QTime::currentTime().toString("HH:mm")));
+    }
+}
+
+void ChatModel::onUserJoinRecieved(QString sender)
+{
+    addMsgToList(MessageItem("", sender + " join chat", Qt::darkGreen, Qt::lightGray,
+                             false, QTime::currentTime().toString("HH:mm")));
+}
+
+void ChatModel::onUserLeftRecieved(QString sender)
+{
+    addMsgToList(MessageItem("", sender + " left chat", Qt::darkRed, Qt::lightGray,
+                             false, QTime::currentTime().toString("HH:mm")));
+}
+
+void ChatModel::onAuthSuccess(QString nickname)
 {
     m_isAuth = true;
     emit isAuthChanged(m_isAuth);
@@ -132,15 +154,26 @@ void ChatModel::authSuccess(const QString &nickname)
     emit nicknameChanged(m_nickname);
 }
 
-void ChatModel::authFail()
+void ChatModel::onAuthFail(QString error)
 {
     m_isAuth = false;
     emit isAuthChanged(m_isAuth);
     m_nickname = "";
     emit nicknameChanged(m_nickname);
+    // TODO: Show message [Auth fail + error]
 }
 
-void ChatModel::joinGroupSuccess(const QString &group)
+void ChatModel::onRegisterSuccess(QString nickname)
+{
+    // TODO: Show message [Register success]
+}
+
+void ChatModel::onRegisterFail(QString error)
+{
+    // TODO: Show message [Register fail + error]
+}
+
+void ChatModel::onJoinGroupSuccess(QString group)
 {
     m_isJoined = true;
     emit isJoinedChanged(m_isJoined);
@@ -148,7 +181,7 @@ void ChatModel::joinGroupSuccess(const QString &group)
     emit groupChanged(m_group);
 }
 
-void ChatModel::joinGroupFail(const QString &error)
+void ChatModel::onJoinGroupFail(QString error)
 {
     m_isJoined = false;
     emit isJoinedChanged(m_isJoined);
@@ -157,12 +190,18 @@ void ChatModel::joinGroupFail(const QString &error)
     qDebug() << "Join group error: " + error;
 }
 
-void ChatModel::addMessageToList(const MessageItem &msg_item)
-{ 
+void ChatModel::onLeaveGroupSuccess()
+{
+    m_isJoined = false;
+    emit isJoinedChanged(m_isJoined);
+    m_group = "";
+    emit groupChanged(m_group);
+}
+
+void ChatModel::addMsgToList(const MessageItem &msg_item)
+{
     emit beginInsertRows(QModelIndex(), 0, 0);
-
     m_messages_list.push_front(msg_item);
-
     emit endInsertRows();
 
     const int size {m_messages_list.size()};
@@ -173,4 +212,9 @@ void ChatModel::addMessageToList(const MessageItem &msg_item)
         m_messages_list.pop_back();
         emit endRemoveRows();
     }
+}
+
+QByteArray ChatModel::hashPassword(const QString &password) const
+{
+    return QCryptographicHash::hash(QByteArray().append(password), QCryptographicHash::Md5);
 }

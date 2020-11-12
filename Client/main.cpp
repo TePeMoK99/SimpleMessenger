@@ -2,7 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "src/mytcpclient.h"
+#include "src/tcpclient.h"
 #include "src/chatmodel.h"
 #include "src/userlistmodel.h"
 

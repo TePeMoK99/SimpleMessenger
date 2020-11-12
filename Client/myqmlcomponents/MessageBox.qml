@@ -10,7 +10,8 @@ RowLayout {
     property string backColor: ""
     property bool isMy: false
 
-    Layout.fillWidth: true
+    anchors.horizontalCenter: parent.horizontalCenter
+    width: parent.width
 
     Rectangle {
         id: root_rect
@@ -18,10 +19,9 @@ RowLayout {
         width: message_text.width + time_text.width + 50
         height: message_text.height + 30
         radius: 25
-
-        Layout.alignment: root_row.isMy ? Qt.AlignLeft : Qt.AlignRight
-        Layout.leftMargin: 25
-        Layout.rightMargin: 25
+        Layout.alignment: isMy ? Qt.AlignRight : Qt.AlignLeft
+        Layout.leftMargin: 15
+        Layout.rightMargin: 15
 
         color: backColor
 

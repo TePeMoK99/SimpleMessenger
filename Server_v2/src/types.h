@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <QObject>
-
+namespace Server
+{
 enum MessageType : quint8
 {
     USER_JOIN = 1,
@@ -26,4 +27,4 @@ enum MessageType : quint8
     CREATE_GROUP_SUCCESS,
     CREATE_GROUP_FAIL
 };
-
+}

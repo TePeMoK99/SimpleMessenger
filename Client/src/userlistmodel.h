@@ -4,7 +4,7 @@
 #include <QList>
 
 #include "userlistitem.h"
-#include "mytcpclient.h"
+#include "tcpclient.h"
 
 class UserListModel : public QAbstractListModel
 {
@@ -27,18 +27,18 @@ public:
     int usersOnline() const { return m_users_online; }
 
 public slots:
-    void setUsersOnline(const int &users_online);
+    void setUsersOnline(int users_online);
 
 signals:
-    void usersOnlineChanged(const int &users_online);
+    void usersOnlineChanged(int users_online);
 
 private slots:
-    void addUser(const QString &nickname);
-    void removeUser(const QString &nickname);
-    void recieveUsersList(const QStringList &users_list);
+    void onUserJoinRecieved(QString nickname);
+    void onUserLeftRecieved(QString nickname);
+    void onUsersListRecieved(QStringList users_list);
 
 private:
     QList<UserListItem> m_users_list;
-    MyTcpClient *tcp_client;
+    TCPClient *tcp_client;
     int m_users_online;
 };

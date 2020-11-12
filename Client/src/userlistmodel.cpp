@@ -3,10 +3,10 @@
 UserListModel::UserListModel(QObject *parent)
     : QAbstractListModel(parent), m_users_online {0}
 {
-    tcp_client = MyTcpClient::instance();
-    connect(tcp_client, &MyTcpClient::userJoinRecieved,  this, &UserListModel::addUser);
-    connect(tcp_client, &MyTcpClient::userLeftRecieved,  this, &UserListModel::removeUser);
-    connect(tcp_client, &MyTcpClient::usersListRecieved, this, &UserListModel::recieveUsersList);
+    tcp_client = TCPClient::instance();
+    connect(tcp_client, &TCPClient::userJoinRecieved,  this, &UserListModel::onUserJoinRecieved);
+    connect(tcp_client, &TCPClient::userLeftRecieved,  this, &UserListModel::onUserLeftRecieved);
+    connect(tcp_client, &TCPClient::usersListRecieved, this, &UserListModel::onUsersListRecieved);
 }
 
 int UserListModel::rowCount(const QModelIndex &parent) const
@@ -42,7 +42,7 @@ QHash<int, QByteArray> UserListModel::roleNames() const
     return roles;
 }
 
-void UserListModel::setUsersOnline(const int &users_online)
+void UserListModel::setUsersOnline(int users_online)
 {
     if (m_users_online == users_online)
         return;
@@ -51,15 +51,15 @@ void UserListModel::setUsersOnline(const int &users_online)
     emit usersOnlineChanged(m_users_online);
 }
 
-void UserListModel::addUser(const QString &nickname)
+void UserListModel::onUserJoinRecieved(QString nickname)
 {
     if (m_users_list.contains(UserListItem(nickname, Qt::black, true)))
         return;
 
     emit beginInsertRows(QModelIndex(), 0, 0);
 
-    if (nickname == tcp_client->client_name)
-        m_users_list.push_front(UserListItem(nickname, Qt::green, true));
+    if (nickname == tcp_client->name)
+        m_users_list.push_front(UserListItem(nickname, Qt::darkGreen, true));
     else
         m_users_list.push_front(UserListItem(nickname, Qt::black, true));
 
@@ -68,7 +68,7 @@ void UserListModel::addUser(const QString &nickname)
     setUsersOnline(m_users_online + 1);
 }
 
-void UserListModel::removeUser(const QString &nickname)
+void UserListModel::onUserLeftRecieved(QString nickname)
 {
     const int size {m_users_list.size()};
 
@@ -86,7 +86,7 @@ void UserListModel::removeUser(const QString &nickname)
     }
 }
 
-void UserListModel::recieveUsersList(const QStringList &users_list)
+void UserListModel::onUsersListRecieved(QStringList users_list)
 {
     emit beginRemoveRows(QModelIndex(), 0, m_users_list.size() - 1);
     m_users_list.clear();
@@ -95,6 +95,6 @@ void UserListModel::recieveUsersList(const QStringList &users_list)
 
     for (auto i : users_list)
     {
-        addUser(i);
+        onUserJoinRecieved(i);
     }
 }
