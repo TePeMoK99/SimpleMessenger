@@ -58,6 +58,7 @@ signals:
     void isJoinedChanged(bool isJoined);
     void nicknameChanged(QString nickname);
     void groupChanged(QString group);
+    void gs();
 
 private slots:
     void onPublicMessageRecieved (QString sender, QString message);

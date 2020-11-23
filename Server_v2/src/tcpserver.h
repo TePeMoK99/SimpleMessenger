@@ -32,7 +32,7 @@ private slots:
 
     void onCreateGroupRequest(QString client_name, QString group_name, QString group_password);
     void onJoinGroupRequest(QString client_name, QString group_name, QString group_password);
-    void onLeftGroupRequest(QString client_name, QString group_name);
+    void onLeaveGroupRequest(QString client_name, QString group_name);
 
     void onPublicMessage(QString sender, QString group_name, QString msg);
     void onPrivateMessage(QString sender, QString receiver, QString group_name, QString msg);

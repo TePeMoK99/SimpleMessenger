@@ -223,6 +223,7 @@ void TCPClient::onReayRead()
     }
     case MessageType::LEAVE_GROUP_SUCCESS:
     {
+        qDebug() << "LEAVE_GROUP_SUCCESS";
         emit leaveGroupSuccess();
 
         break;

@@ -59,10 +59,6 @@ QHash<int, QByteArray> ChatModel::roleNames() const
 
 void ChatModel::leaveGroup()
 {
-    emit beginRemoveRows(QModelIndex(), 0, m_messages_list.size() - 1);
-    m_messages_list.clear();
-    emit endRemoveRows();
-
     client->leaveGroup();
 }
 
@@ -192,6 +188,10 @@ void ChatModel::onJoinGroupFail(QString error)
 
 void ChatModel::onLeaveGroupSuccess()
 {
+    emit beginRemoveRows(QModelIndex(), 0, m_messages_list.size() - 1);
+    m_messages_list.clear();
+    emit endRemoveRows();
+
     m_isJoined = false;
     emit isJoinedChanged(m_isJoined);
     m_group = "";

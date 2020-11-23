@@ -12,7 +12,7 @@ class Selector
 public:
     std::pair<RESULT, bool> rowExist(const QString &data, const QString &field_name, const QString &table_name);
     std::pair<RESULT, bool> rowContains(const QString &table_name, const QStringList &fields, const QVariantList &row_data);
-    std::pair<RESULT, std::vector<std::pair<QString, QString>>> requestGroupsList();
+    std::pair<RESULT, QStringList> requestGroupsList();
 
 
 private:

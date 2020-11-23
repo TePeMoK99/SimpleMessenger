@@ -27,7 +27,7 @@ signals:
 
     void createGroupRequest(QString client_name, QString group_name, QString group_password);
     void joinGroupRequest(QString client_name, QString group_name, QString group_password);
-    void leftGroupRequest(QString client_name, QString group_name);
+    void leaveGroupRequest(QString client_name, QString group_name);
 
     void publicMessage(QString sender, QString group_name, QString msg);
     void privateMessage(QString sender, QString receiver, QString group_name, QString msg);

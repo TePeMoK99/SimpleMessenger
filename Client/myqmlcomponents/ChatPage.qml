@@ -15,7 +15,7 @@ Page {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.topMargin: 50
-        text: "Left group"
+        text: "Leave group"
         z: 5       
 
         onClicked: {

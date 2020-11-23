@@ -31,7 +31,7 @@ public:
     bool registerGroup(const QString &group_name, const QString &group_password);
     bool checkUserPassword(const QString &nickname, const QString &password);
     bool checkGroupPassword(const QString &group_name, const QString &group_password);
-    std::vector<std::pair<QString, QString>> requestGroupsList();
+    QStringList requestGroupsList();
 
 private:
     Processor();

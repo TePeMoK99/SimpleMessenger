@@ -7,15 +7,14 @@ namespace Server
 class TCPClient;
 struct Group
 {
-    Group() : name {"None"}, password {""}, clients {}
+    Group() : name {"None"}, clients {}
     { }
 
-    Group(const QString &name, const QString &password) :
-        name {name}, password {password}
+    Group(const QString &name) :
+        name {name}
     { }
 
     QString name;
-    QString password;
     QHash<QString, TCPClient*> clients;
 };
 }

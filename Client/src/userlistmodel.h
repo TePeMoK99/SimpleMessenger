@@ -17,7 +17,7 @@ public:
     enum Roles
     {
         NicknameRole = Qt::UserRole + 1,
-        OnlineRole,
+        IsOnlineRole,
         ColorRole
     };
 
@@ -31,6 +31,8 @@ public slots:
 
 signals:
     void usersOnlineChanged(int users_online);
+
+    void test();
 
 private slots:
     void onUserJoinRecieved(QString nickname);

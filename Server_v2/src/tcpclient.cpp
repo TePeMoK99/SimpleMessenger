@@ -81,7 +81,7 @@ void TCPClient::onReadyRead()
     }
     case MessageType::LEAVE_GROUP_REQUEST:
     {
-        emit leftGroupRequest(name, current_group);
+        emit leaveGroupRequest(name, current_group);
 
         break;
     }
@@ -115,7 +115,7 @@ void TCPClient::onReadyRead()
 
 void TCPClient::onDisconnected()
 {
-    emit leftGroupRequest(name, current_group);
+    emit leaveGroupRequest(name, current_group);
     deleteLater();
 }
 }

@@ -16,7 +16,7 @@ void TCPServer::incomingConnection(qintptr handle)
 
     connect(new_client, &TCPClient::createGroupRequest, this, &TCPServer::onCreateGroupRequest);
     connect(new_client, &TCPClient::joinGroupRequest, this, &TCPServer::onJoinGroupRequest);
-    connect(new_client, &TCPClient::leftGroupRequest, this, &TCPServer::onLeftGroupRequest);
+    connect(new_client, &TCPClient::leaveGroupRequest, this, &TCPServer::onLeaveGroupRequest);
 
     connect(new_client, &TCPClient::publicMessage, this, &TCPServer::onPublicMessage);
     connect(new_client, &TCPClient::privateMessage, this, &TCPServer::onPrivateMessage);
@@ -37,11 +37,12 @@ bool TCPServer::start()
     qDebug() << "Server successfuly started";
     qDebug() << "List of aviable groups: ";
 
-    auto groups_vector = crud_processor->requestGroupsList();
+    QStringList groups_vector = crud_processor->requestGroupsList();
+
     for (auto i : groups_vector)
     {
-        groups[i.first] = Group(i.first, i.second);
-        qDebug() << i.first;
+        groups[i] = Group(i);
+        qDebug() << i;
     }
     return true;
 }
@@ -177,7 +178,7 @@ void TCPServer::onCreateGroupRequest(QString client_name, QString group_name, QS
         return;
     }
     crud_processor->registerGroup(group_name, group_password);
-    groups[group_name] = Group(group_name, group_password);
+    groups[group_name] = Group(group_name);
     qDebug() << group_name + " created";
 
     QByteArray data = makeByteArray(MessageType::CREATE_GROUP_SUCCESS, group_name);
@@ -193,7 +194,7 @@ void TCPServer::onJoinGroupRequest(QString client_name, QString group_name, QStr
 
         return;
     }
-    if (groups[group_name].password != group_password)
+    if (!crud_processor->checkGroupPassword(group_name, group_password))
     {
         QByteArray data = makeByteArray(MessageType::JOIN_GROUP_FAIL, "Wrong password");
         groups["None"].clients[client_name]->socket->write(data);
@@ -216,11 +217,13 @@ void TCPServer::onJoinGroupRequest(QString client_name, QString group_name, QStr
     }   
 }
 
-void TCPServer::onLeftGroupRequest(QString client_name, QString group_name)
+void TCPServer::onLeaveGroupRequest(QString client_name, QString group_name)
 {
     groups[group_name].clients[client_name]->current_group = "None";
     groups["None"].clients[client_name] = std::move(groups[group_name].clients[client_name]);
     groups[group_name].clients.remove(client_name);
+
+    groups["None"].clients[client_name]->socket->write(makeByteArray(MessageType::LEAVE_GROUP_SUCCESS));
 
     qDebug() << client_name + " [ " + group_name + " -> " + "None ]";
 
