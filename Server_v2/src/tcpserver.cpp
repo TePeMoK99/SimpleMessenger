@@ -39,7 +39,7 @@ bool TCPServer::start()
 
     QStringList groups_vector = crud_processor->requestGroupsList();
 
-    for (auto i : groups_vector)
+    for (const auto &i : groups_vector)
     {
         groups[i] = Group(i);
         qDebug() << i;
@@ -91,9 +91,9 @@ void TCPServer::onAuthRequest(quintptr handle, QString name, QString password)
 
     auto isAlreadyJoined = [this](const QString &client_name)
     {
-        for (auto i : groups)
+        for (const auto &i : qAsConst(groups))
         {
-            for (auto j : i.clients)
+            for (const auto &j : i.clients)
             {
                 if (j->name == client_name)
                 {
@@ -106,7 +106,8 @@ void TCPServer::onAuthRequest(quintptr handle, QString name, QString password)
 
     if (isAlreadyJoined(name))
     {
-        QByteArray data = makeByteArray(MessageType::AUTH_FAIL, "User with this nickname already on server");
+        QByteArray data = makeByteArray(MessageType::AUTH_FAIL,
+                                        "User with this nickname already on server");
         not_auth_clients[handle]->socket->write(data);
         qDebug() << "User with \"" + name + "\" nickname already on server";
 
@@ -144,7 +145,7 @@ void TCPServer::onClientDisconnected(QString name)
 void TCPServer::onPublicMessage(QString sender, QString group_name, QString msg)
 {
     QByteArray data = makeByteArray(MessageType::PUBLIC_MESSAGE, {sender, msg});
-    for (auto i : groups[group_name].clients)
+    for (const auto &i : groups[group_name].clients)
     {
         i->socket->write(data);
     }
@@ -211,7 +212,7 @@ void TCPServer::onJoinGroupRequest(QString client_name, QString group_name, QStr
     groups[group_name].clients[client_name]->socket->write(data);
 
     data = makeByteArray(MessageType::USER_JOIN, client_name);
-    for (auto i : groups[group_name].clients)
+    for (const auto &i : qAsConst(groups[group_name].clients))
     {
         i->socket->write(data);
     }   
@@ -229,7 +230,7 @@ void TCPServer::onLeaveGroupRequest(QString client_name, QString group_name)
 
     QByteArray data = makeByteArray(MessageType::USER_LEFT, client_name);
 
-    for (auto i : groups[group_name].clients)
+    for (const auto &i : groups[group_name].clients)
     {
         i->socket->write(data);
     }
@@ -239,7 +240,7 @@ void TCPServer::onUsersListRequest(QString client_name, QString group_name)
 {
     QString clients_list {};
     qDebug() << "Online users:";
-    for (auto i : groups[group_name].clients)
+    for (const auto &i : groups[group_name].clients)
     {
         clients_list += i->name + "|";
         qDebug() << i->name;
@@ -256,7 +257,7 @@ QByteArray TCPServer::makeByteArray(const quint8 &msg_type, const QStringList &p
     QDataStream data_stream(&data, QIODevice::WriteOnly);
     data_stream << quint16(0) << quint8(msg_type);
 
-    for (auto i : params)
+    for (const auto &i : params)
         data_stream << i;
 
     data_stream.device()->seek(0);

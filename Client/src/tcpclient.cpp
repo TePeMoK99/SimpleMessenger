@@ -48,14 +48,17 @@ void TCPClient::signOut()
 {
     socket->disconnectFromHost();
 }
+
 QByteArray TCPClient::makeByteArray(const quint8 &msg_type, const QStringList &params)
 {
     QByteArray data;
     QDataStream data_stream(&data, QIODevice::WriteOnly);
     data_stream << quint16(0) << msg_type;
 
-    for (auto i : params)
+    for (const auto &i : params)
+    {
         data_stream << i;
+    }
 
     data_stream.device()->seek(0);
     data_stream << static_cast<quint16>(data.size() - sizeof(quint16));
@@ -229,7 +232,10 @@ void TCPClient::onReayRead()
         break;
     }
     }
-    emit socket->readyRead();
+    if (socket->bytesAvailable() > 0)
+    {
+        emit socket->readyRead();
+    }
 }
 
 void TCPClient::onDisconnected()

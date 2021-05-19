@@ -56,7 +56,7 @@ bool Processor::checkUserPassword(const QString &nickname, const QString &passwo
 
 bool Processor::checkGroupPassword(const QString &group_name, const QString &group_password)
 {
-    return m_processor_private->selector.rowContains("Group_", {"nickname", "password"}, {group_name, group_password}).second;
+    return m_processor_private->selector.rowContains("Group_", {"name", "password"}, {group_name, group_password}).second;
 }
 
 QStringList Processor::requestGroupsList()

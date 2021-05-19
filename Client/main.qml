@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 
 import ChatModel 1.0
 import UserListModel 1.0
-import "myqmlcomponents/"
+import "qml/"
 
 ApplicationWindow {
     id: root

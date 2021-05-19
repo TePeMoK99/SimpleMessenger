@@ -9,7 +9,7 @@ namespace CRUD
 
 std::pair<RESULT, bool> Selector::rowExist(const QString &data, const QString &field_name, const QString &table_name)
 {
-    QString request {"SELECT COUNT(*) FROM " + table_name + "WHERE " + makeANDexpression({field_name}, {data})};
+    QString request {"SELECT COUNT(*) FROM " + table_name + " WHERE " + makeANDexpression({field_name}, {data})};
     QSqlQuery result_query;
     RESULT result;
     std::tie(result, result_query) = m_executor.execute(request);

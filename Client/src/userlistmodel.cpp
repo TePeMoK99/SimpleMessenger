@@ -24,9 +24,9 @@ QVariant UserListModel::data(const QModelIndex &index, int role) const
 
     switch (role)
     {
-    case NicknameRole: return QVariant(m_users_list[index.row()].nickname);
-    case IsOnlineRole:   return QVariant(m_users_list[index.row()].online);
-    case ColorRole:    return QVariant(m_users_list[index.row()].color);
+    case NicknameRole:  return QVariant(m_users_list[index.row()].nickname);
+    case IsOnlineRole:  return QVariant(m_users_list[index.row()].online);
+    case ColorRole:     return QVariant(m_users_list[index.row()].color);
     }
 
     return QVariant();

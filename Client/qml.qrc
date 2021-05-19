@@ -1,11 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>myqmlcomponents/MessageBox.qml</file>
-        <file>myqmlcomponents/LoginPage.qml</file>
-        <file>myqmlcomponents/ChatPage.qml</file>
-        <file>myqmlcomponents/UsersListPage.qml</file>
-        <file>myqmlcomponents/UserBox.qml</file>
-        <file>myqmlcomponents/GroupJoinPage.qml</file>
+        <file>qml/ChatPage.qml</file>
+        <file>qml/GroupCreatePage.qml</file>
+        <file>qml/GroupJoinPage.qml</file>
+        <file>qml/LoginPage.qml</file>
+        <file>qml/MessageBox.qml</file>
+        <file>qml/UserBox.qml</file>
+        <file>qml/UsersListPage.qml</file>
     </qresource>
 </RCC>
