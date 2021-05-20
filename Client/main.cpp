@@ -1,6 +1,7 @@
 ﻿#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 
 #include "src/tcpclient.h"
 #include "src/chatmodel.h"
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
+    QQuickStyle::setStyle("Material");
     QQmlApplicationEngine engine;
 
     qmlRegisterType<ChatModel>("ChatModel", 1, 0, "ChatModel");

@@ -80,7 +80,7 @@ bool ConnectionManagerPrivate::setup()
 bool ConnectionManagerPrivate::setupWorkspace()
 {
     const QString database_name {"db.db"};
-    const QString location {"D:\\_Projects\\QT_Projects\\_GitHub\\SimpleMessenger\\Server_v2"};
+    const QString location {"C:\\Users\\pyankov\\Documents\\Qt_Projects\\SimpleMessenger\\Server_v2"};
     const QString fullpath {location + "\\" + database_name};
 
     m_databasePath = fullpath;

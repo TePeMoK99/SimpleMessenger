@@ -48,7 +48,7 @@ void UserListModel::setUsersOnline(int users_online)
         return;
 
     m_users_online = users_online;
-    emit usersOnlineChanged(m_users_online);
+    usersOnlineChanged(m_users_online);
 }
 
 void UserListModel::onUserJoinRecieved(QString nickname)
@@ -56,14 +56,14 @@ void UserListModel::onUserJoinRecieved(QString nickname)
     if (m_users_list.contains(UserListItem(nickname, Qt::black, true)))
         return;
 
-    emit beginInsertRows(QModelIndex(), 0, 0);
+    beginInsertRows(QModelIndex(), 0, 0);
 
     if (nickname == tcp_client->name)
         m_users_list.push_front(UserListItem(nickname, Qt::darkGreen, true));
     else
         m_users_list.push_front(UserListItem(nickname, Qt::black, true));
 
-    emit endInsertRows();
+    endInsertRows();
 
     setUsersOnline(m_users_online + 1);
 }
@@ -76,9 +76,9 @@ void UserListModel::onUserLeftRecieved(QString nickname)
     {
         if (m_users_list[i].nickname == nickname)
         {
-            emit beginRemoveRows(QModelIndex(), i, i);
+            beginRemoveRows(QModelIndex(), i, i);
             m_users_list.removeAt(i);
-            emit endRemoveRows();
+            endRemoveRows();
 
             setUsersOnline(m_users_online - 1);
             break;
@@ -88,9 +88,9 @@ void UserListModel::onUserLeftRecieved(QString nickname)
 
 void UserListModel::onUsersListRecieved(QStringList users_list)
 {
-    emit beginRemoveRows(QModelIndex(), 0, m_users_list.size() - 1);
+    beginRemoveRows(QModelIndex(), 0, m_users_list.size() - 1);
     m_users_list.clear();
-    emit endRemoveRows();
+    endRemoveRows();
     setUsersOnline(0);
 
     for (auto i : users_list)

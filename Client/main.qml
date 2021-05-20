@@ -18,30 +18,30 @@ ApplicationWindow {
         onIsAuthChanged: {
             if (isAuth && isJoined) {
                 stack_view.clear()
-                stack_view.push("myqmlcomponents/ChatPage.qml")
+                stack_view.push("qml/ChatPage.qml")
             }
             else if (isAuth && !isJoined) {
                 stack_view.clear()
-                stack_view.push("myqmlcomponents/GroupJoinPage.qml")
+                stack_view.push("qml/GroupJoinPage.qml")
             }
             else {
                 stack_view.clear()
-                stack_view.push("myqmlcomponents/LoginPage.qml")
+                stack_view.push("qml/LoginPage.qml")
             }
         }
 
         onIsJoinedChanged: {
             if (isAuth && isJoined) {
                 stack_view.clear()
-                stack_view.push("myqmlcomponents/ChatPage.qml")
+                stack_view.push("qml/ChatPage.qml")
             }
             else if (isAuth && !isJoined) {
                 stack_view.clear()
-                stack_view.push("myqmlcomponents/GroupJoinPage.qml")
+                stack_view.push("qml/GroupJoinPage.qml")
             }
             else {
                 stack_view.clear()
-                stack_view.push("myqmlcomponents/LoginPage.qml")
+                stack_view.push("qml/LoginPage.qml")
             }
         }
     }

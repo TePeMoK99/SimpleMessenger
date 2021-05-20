@@ -39,7 +39,7 @@ std::pair<RESULT, QSqlQuery> Executor::execute(const QString &queryText, const Q
 QString stringListToString(const QStringList &params)
 {
     QString result {};
-    for (auto i : params)
+    for (const auto &i : params)
     {
         result += (i + ",");
     }

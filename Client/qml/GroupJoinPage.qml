@@ -166,6 +166,6 @@ Page {
         anchors.top: parent.top
         text: "Exit"
 
-        onClicked: chat_model.leftChat()
+        onClicked: chat_model.signOut()
     }
 }

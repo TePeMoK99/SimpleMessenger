@@ -1,4 +1,4 @@
-QT += quick core network
+QT += quick core network quickcontrols2
 
 CONFIG += c++14
 
