@@ -10,7 +10,6 @@
 
 #include "messageitem.h"
 
-// plt.hist(..., ...);
 
 class ChatModel : public QAbstractListModel
 {
