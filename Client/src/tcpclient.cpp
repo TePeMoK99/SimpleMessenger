@@ -7,7 +7,7 @@
 
 TCPClient::TCPClient() : name {"Default"}, block_size {0}
 {
-    socket = new QTcpSocket(this);
+    socket = new QSslSocket {this};
     connect(socket, &QTcpSocket::readyRead,    this, &TCPClient::onReayRead);
     connect(socket, &QTcpSocket::disconnected, this, &TCPClient::onDisconnected);
 }
@@ -20,26 +20,36 @@ TCPClient* TCPClient::instance()
 
 void TCPClient::sendPublicMsg(const QString &message_text)
 {
+    socket->waitForEncrypted();
+
     socket->write(makeByteArray(MessageType::PUBLIC_MESSAGE, {message_text}));
 }
 
 void TCPClient::sendPrivateMsg(const QString &reciever, const QString &message_text)
 {
+    socket->waitForEncrypted();
+
     socket->write(makeByteArray(MessageType::PRIVATE_MESSAGE, {reciever, message_text}));
 }
 
 void TCPClient::singUp(const QHostAddress &host, const int &port, const QString &nickname, const QString &password)
 {
-    socket->connectToHost(host, port);
+    socket->connectToHost/*Encrypted*/("127.0.0.1", port);
     QByteArray data {makeByteArray(MessageType::REGISTER_REQUEST, {nickname, password})};
     qDebug() << data;
+
+    socket->waitForEncrypted();
+
     socket->write(data);
     qDebug() << "Registration request sent";
 }
 
 void TCPClient::signIn(const QHostAddress &host, const int &port, const QString &nickname, const QString &password)
 {
-    socket->connectToHost(host, port);
+    socket->connectToHost/*Encrypted*/("127.0.0.1", port);
+
+    socket->waitForEncrypted();
+
     socket->write(makeByteArray(MessageType::AUTH_REQUEST, {nickname, password}));
     qDebug() << "Auth request sent";
 }
@@ -81,16 +91,22 @@ QByteArray TCPClient::makeByteArray(const quint8 &msg_type, const QString &param
 
 void TCPClient::joinGroup(const QString &group, const QString &password)
 {
+    socket->waitForEncrypted();
+
     socket->write(makeByteArray(MessageType::JOIN_GROUP_REQUEST, {group, password}));
 }
 
 void TCPClient::leaveGroup()
 {
+    socket->waitForEncrypted();
+
     socket->write(makeByteArray(MessageType::LEAVE_GROUP_REQUEST));
 }
 
 void TCPClient::createGroup(const QString &group, const QString &password)
 {
+    socket->waitForEncrypted();
+
     socket->write(makeByteArray(MessageType::CREATE_GROUP_REQUEST, {group, password}));
 }
 
@@ -159,6 +175,9 @@ void TCPClient::onReayRead()
         qDebug() << "JOIN_GROIP_SUCCESS";
         data_stream >> current_group;
         emit joinGroupSuccess(current_group);
+
+        socket->waitForEncrypted();
+
         socket->write(makeByteArray(MessageType::USERS_LIST_REQUEST));
 
         break;
@@ -240,7 +259,10 @@ void TCPClient::onReayRead()
 
 void TCPClient::onDisconnected()
 {
+    socket->waitForEncrypted();
+
     socket->write(makeByteArray(MessageType::USER_LEFT, {name}));
+
     name = current_group = "";
     socket->disconnectFromHost();
 }

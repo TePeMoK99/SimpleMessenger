@@ -81,9 +81,9 @@ private:
     QByteArray hashPassword(const QString &password) const;
 
     QList <MessageItem> m_messages_list;
-    TCPClient *client;
-    QString m_nickname;
-    QString m_group;
-    bool m_isAuth;
-    bool m_isJoined;
+    TCPClient           *client;
+    QString             m_nickname;
+    QString             m_group;
+    bool                m_isAuth;
+    bool                m_isJoined;
 };

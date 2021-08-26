@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <QSslSocket>
 #include <QTcpSocket>
 #include <QDebug>
 #include <vector>
@@ -52,9 +53,9 @@ signals:
 private:
     TCPClient();
 
-    QTcpSocket *socket;
-    QByteArray data;
-    QString name;
-    QString current_group;
-    quint16 block_size;
+    QSslSocket  *socket;
+    QByteArray  data;
+    QString     name;
+    QString     current_group;
+    quint16     block_size;
 };

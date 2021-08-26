@@ -41,6 +41,6 @@ private slots:
 
 private:
     QList<UserListItem> m_users_list;
-    TCPClient *tcp_client;
-    int m_users_online;
+    TCPClient           *tcp_client;
+    int                 m_users_online;
 };
