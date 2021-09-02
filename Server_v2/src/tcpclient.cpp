@@ -2,9 +2,11 @@
 
 namespace Server
 {
-TCPClient::TCPClient(quintptr handle) : block_size {0}, handle {handle}
+TCPClient::TCPClient(quintptr handle) :
+    socket      {new QSslSocket {this}},
+    block_size  {0},
+    handle      {handle}
 {
-    socket = new QSslSocket {this};
     socket->setSocketDescriptor(handle);
 //    socket->startServerEncryption();
     connect(socket, &QTcpSocket::readyRead, this, &TCPClient::onReadyRead);
@@ -13,7 +15,7 @@ TCPClient::TCPClient(quintptr handle) : block_size {0}, handle {handle}
 
 void TCPClient::onReadyRead()
 {
-    QByteArray data {socket->readAll()};
+    QByteArray  data        {socket->readAll()};
     QDataStream data_stream {&data, QIODevice::ReadOnly};
 
     if (block_size == 0)
@@ -34,14 +36,17 @@ void TCPClient::onReadyRead()
 
     quint8 type {};
     data_stream >> type;
+
     switch (type)
     {
     case MessageType::REGISTER_REQUEST:
     {
         QString n_name {};
         QString password {};
+
         data_stream >> n_name;
         data_stream >> password;
+
         qDebug() << "REGISTER_REQUEST from " + n_name;
         emit registerRequest(handle, n_name, password);
 
@@ -51,8 +56,10 @@ void TCPClient::onReadyRead()
     {
         QString n_name {};
         QString password {};
+
         data_stream >> n_name;
         data_stream >> password;
+
         qDebug() << "AUTH_REQUEST from " + n_name;
         emit authRequest(handle, n_name, password);
 
@@ -62,8 +69,10 @@ void TCPClient::onReadyRead()
     {
         QString group_name {};
         QString group_password {};
+
         data_stream >> group_name;
         data_stream >> group_password;
+
         qDebug() << "JOIN_GROUP_REQUEST from " + name + " to group " + group_name;
         emit joinGroupRequest(name, group_name, group_password);
 
@@ -73,8 +82,10 @@ void TCPClient::onReadyRead()
     {
         QString group_name {};
         QString group_password {};
+
         data_stream >> group_name;
         data_stream >> group_password;
+
         qDebug() << "CREATE_GROUP_REQUEST: [" + group_name + " : " + group_password + "]";
         emit createGroupRequest(name, group_name, group_password);
 

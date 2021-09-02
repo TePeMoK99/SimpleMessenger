@@ -28,6 +28,6 @@ struct UserListItem
     }
 
     QString nickname;
-    QColor color;
-    bool online;
+    QColor  color;
+    bool    online;
 };

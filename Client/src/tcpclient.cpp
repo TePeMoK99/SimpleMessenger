@@ -5,9 +5,11 @@
 
 #include "types.h"
 
-TCPClient::TCPClient() : name {"Default"}, block_size {0}
+TCPClient::TCPClient() :
+    socket {new QSslSocket {this}},
+    name            {"Default"},
+    block_size      {0}
 {
-    socket = new QSslSocket {this};
     connect(socket, &QTcpSocket::readyRead,    this, &TCPClient::onReayRead);
     connect(socket, &QTcpSocket::disconnected, this, &TCPClient::onDisconnected);
 }
@@ -121,6 +123,7 @@ void TCPClient::onReayRead()
         {
             return;
         }
+
         data_stream >> block_size;
     }
 
@@ -251,6 +254,7 @@ void TCPClient::onReayRead()
         break;
     }
     }
+
     if (socket->bytesAvailable() > 0)
     {
         emit socket->readyRead();

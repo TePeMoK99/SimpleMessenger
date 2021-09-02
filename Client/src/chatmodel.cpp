@@ -1,27 +1,31 @@
 ﻿#include "chatmodel.h"
 #include "types.h"
 
-ChatModel::ChatModel(QObject *parent)
-    : QAbstractListModel {parent}, m_isAuth {false}, m_isJoined {false}
+ChatModel::ChatModel(QObject *parent) :
+    QAbstractListModel  {parent},
+    client              {TCPClient::instance()},
+    m_isAuth            {false},
+    m_isJoined          {false}
 {
-    client = TCPClient::instance();
-    connect(client, &TCPClient::publicMsgRecieved, this, &ChatModel::onPublicMessageRecieved);
+    connect(client, &TCPClient::publicMsgRecieved,  this, &ChatModel::onPublicMessageRecieved);
     connect(client, &TCPClient::privateMsgRecieved, this, &ChatModel::onPrivateMessageRecieved);
-    connect(client, &TCPClient::userJoinRecieved, this, &ChatModel::onUserJoinRecieved);
-    connect(client, &TCPClient::userLeftRecieved, this, &ChatModel::onUserLeftRecieved);
-    connect(client, &TCPClient::authSuccess, this, &ChatModel::onAuthSuccess);
-    connect(client, &TCPClient::registerSuccess, this, &ChatModel::onRegisterSuccess);
-    connect(client, &TCPClient::authFail, this, &ChatModel::onAuthFail);
-    connect(client, &TCPClient::registerFail, this, &ChatModel::onRegisterFail);
-    connect(client, &TCPClient::joinGroupSuccess, this, &ChatModel::onJoinGroupSuccess);
-    connect(client, &TCPClient::joinGroupFail, this, &ChatModel::onJoinGroupFail);
-    connect(client, &TCPClient::leaveGroupSuccess, this, &ChatModel::onLeaveGroupSuccess);
+    connect(client, &TCPClient::userJoinRecieved,   this, &ChatModel::onUserJoinRecieved);
+    connect(client, &TCPClient::userLeftRecieved,   this, &ChatModel::onUserLeftRecieved);
+    connect(client, &TCPClient::authSuccess,        this, &ChatModel::onAuthSuccess);
+    connect(client, &TCPClient::registerSuccess,    this, &ChatModel::onRegisterSuccess);
+    connect(client, &TCPClient::authFail,           this, &ChatModel::onAuthFail);
+    connect(client, &TCPClient::registerFail,       this, &ChatModel::onRegisterFail);
+    connect(client, &TCPClient::joinGroupSuccess,   this, &ChatModel::onJoinGroupSuccess);
+    connect(client, &TCPClient::joinGroupFail,      this, &ChatModel::onJoinGroupFail);
+    connect(client, &TCPClient::leaveGroupSuccess,  this, &ChatModel::onLeaveGroupSuccess);
 }
 
 int ChatModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
+    {
         return 0;
+    }
 
     return m_messages_list.size();
 }
@@ -29,32 +33,34 @@ int ChatModel::rowCount(const QModelIndex &parent) const
 QVariant ChatModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
+    {
         return QVariant();
+    }
 
     switch (role)
     {
-    case SenderRole:    return QVariant(m_messages_list[index.row()].sender);
-    case MessageRole:   return QVariant(m_messages_list[index.row()].message);
-    case IsMyRole:      return QVariant(m_messages_list[index.row()].isMine);
-    case TimeRole:      return QVariant(m_messages_list[index.row()].time);
-    case FontColorRole: return QVariant(m_messages_list[index.row()].fontColor);
-    case BackColorRole: return QVariant(m_messages_list[index.row()].backColor);
+    case SenderRole:    return m_messages_list[index.row()].sender;
+    case MessageRole:   return m_messages_list[index.row()].message;
+    case IsMyRole:      return m_messages_list[index.row()].isMine;
+    case TimeRole:      return m_messages_list[index.row()].time;
+    case FontColorRole: return m_messages_list[index.row()].fontColor;
+    case BackColorRole: return m_messages_list[index.row()].backColor;
     }
 
     return QVariant();
 }
 
+
 QHash<int, QByteArray> ChatModel::roleNames() const
 {
-    QHash<int, QByteArray> roles {};
-    roles[SenderRole] = "sender_";
-    roles[MessageRole] = "message_";
-    roles[TimeRole] = "time_";
-    roles[IsMyRole] = "isMy_";
-    roles[FontColorRole] = "font_color";
-    roles[BackColorRole] = "back_color";
-
-    return roles;
+    return {
+        { SenderRole,     "sender_"    },
+        { MessageRole,    "message_"   },
+        { TimeRole,       "time_"      },
+        { IsMyRole,       "isMy_"      },
+        { FontColorRole,  "font_color" },
+        { BackColorRole,  "back_color" }
+    };
 }
 
 void ChatModel::leaveGroup()
@@ -107,12 +113,12 @@ void ChatModel::onPublicMessageRecieved(QString sender, QString message)
     if (sender != m_nickname)
     {
         addMsgToList(MessageItem("From " + sender, message, Qt::black, "#90EE90",
-                                 false, QTime::currentTime().toString("HH:mm")));
+            false, QTime::currentTime().toString("HH:mm")));
     }
     else
     {
         addMsgToList(MessageItem("You", message, Qt::black, "#80D4FF",
-                                 true, QTime::currentTime().toString("HH:mm")));
+            true, QTime::currentTime().toString("HH:mm")));
     }
 }
 
@@ -121,25 +127,25 @@ void ChatModel::onPrivateMessageRecieved(QString sender, QString reciever, QStri
     if (sender != m_nickname)
     {
         addMsgToList(MessageItem("From " + sender + " to you", message, Qt::black, "#FFB319",
-                                 false, QTime::currentTime().toString("HH:mm")));
+            false, QTime::currentTime().toString("HH:mm")));
     }
     else
     {
         addMsgToList(MessageItem("You to " + reciever, message, Qt::black, "#80D4FF",
-                                 true, QTime::currentTime().toString("HH:mm")));
+            true, QTime::currentTime().toString("HH:mm")));
     }
 }
 
 void ChatModel::onUserJoinRecieved(QString sender)
 {
     addMsgToList(MessageItem("", sender + " join chat", Qt::darkGreen, Qt::lightGray,
-                             false, QTime::currentTime().toString("HH:mm")));
+        false, QTime::currentTime().toString("HH:mm")));
 }
 
 void ChatModel::onUserLeftRecieved(QString sender)
 {
     addMsgToList(MessageItem("", sender + " left chat", Qt::darkRed, Qt::lightGray,
-                             false, QTime::currentTime().toString("HH:mm")));
+        false, QTime::currentTime().toString("HH:mm")));
 }
 
 void ChatModel::onAuthSuccess(QString nickname)

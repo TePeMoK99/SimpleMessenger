@@ -1,9 +1,11 @@
 ﻿#include "userlistmodel.h"
 
-UserListModel::UserListModel(QObject *parent)
-    : QAbstractListModel(parent), m_users_online {0}
+UserListModel::UserListModel(QObject *parent) :
+    QAbstractListModel  {parent},
+    tcp_client          {TCPClient::instance()},
+    m_users_online      {0}
 {
-    tcp_client = TCPClient::instance();
+
     connect(tcp_client, &TCPClient::userJoinRecieved,  this, &UserListModel::onUserJoinRecieved);
     connect(tcp_client, &TCPClient::userLeftRecieved,  this, &UserListModel::onUserLeftRecieved);
     connect(tcp_client, &TCPClient::usersListRecieved, this, &UserListModel::onUsersListRecieved);
@@ -12,7 +14,9 @@ UserListModel::UserListModel(QObject *parent)
 int UserListModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
+    {
         return 0;
+    }
 
     return m_users_list.size();
 }
@@ -20,32 +24,35 @@ int UserListModel::rowCount(const QModelIndex &parent) const
 QVariant UserListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
+    {
         return QVariant();
+    }
 
     switch (role)
     {
-    case NicknameRole:  return QVariant(m_users_list[index.row()].nickname);
-    case IsOnlineRole:  return QVariant(m_users_list[index.row()].online);
-    case ColorRole:     return QVariant(m_users_list[index.row()].color);
+    case NicknameRole:  return m_users_list[index.row()].nickname;
+    case IsOnlineRole:  return m_users_list[index.row()].online;
+    case ColorRole:     return m_users_list[index.row()].color;
     }
 
     return QVariant();
 }
 
 QHash<int, QByteArray> UserListModel::roleNames() const
-{
-    QHash<int, QByteArray> roles {};
-    roles[NicknameRole] = "nickname_";
-    roles[IsOnlineRole] = "online_";
-    roles[ColorRole] = "color_";
-
-    return roles;
+{    
+    return {
+        { NicknameRole,  "nickname_" },
+        { IsOnlineRole,  "online_"   },
+        { ColorRole,     "color_"    }
+    };
 }
 
 void UserListModel::setUsersOnline(int users_online)
 {
     if (m_users_online == users_online)
+    {
         return;
+    }
 
     m_users_online = users_online;
     usersOnlineChanged(m_users_online);
@@ -54,14 +61,20 @@ void UserListModel::setUsersOnline(int users_online)
 void UserListModel::onUserJoinRecieved(QString nickname)
 {
     if (m_users_list.contains(UserListItem(nickname, Qt::black, true)))
+    {
         return;
+    }
 
     beginInsertRows(QModelIndex(), 0, 0);
 
     if (nickname == tcp_client->name)
+    {
         m_users_list.push_front(UserListItem(nickname, Qt::darkGreen, true));
+    }
     else
+    {
         m_users_list.push_front(UserListItem(nickname, Qt::black, true));
+    }
 
     endInsertRows();
 
@@ -81,6 +94,7 @@ void UserListModel::onUserLeftRecieved(QString nickname)
             endRemoveRows();
 
             setUsersOnline(m_users_online - 1);
+
             break;
         }
     }
