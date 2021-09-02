@@ -35,7 +35,7 @@ QVariant ChatModel::data(const QModelIndex &index, int role) const
     {
     case SenderRole:    return QVariant(m_messages_list[index.row()].sender);
     case MessageRole:   return QVariant(m_messages_list[index.row()].message);
-    case IsMyRole:      return QVariant(m_messages_list[index.row()].isMy);
+    case IsMyRole:      return QVariant(m_messages_list[index.row()].isMine);
     case TimeRole:      return QVariant(m_messages_list[index.row()].time);
     case FontColorRole: return QVariant(m_messages_list[index.row()].fontColor);
     case BackColorRole: return QVariant(m_messages_list[index.row()].backColor);

@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 #include <QTcpSocket>
+#include <QSslSocket>
 #include <QObject>
+#include <QSslKey>
 
 #include "types.h"
 #include "tcpserver.h"
@@ -35,10 +37,10 @@ signals:
     void usersListRequest(QString name, QString group);
 
 private:
-    QTcpSocket *socket;
-    quint16 block_size;
-    quintptr handle;
-    QString name;
-    QString current_group;
+    QSslSocket  *socket;
+    quint16     block_size;
+    quintptr    handle;
+    QString     name;
+    QString     current_group;
 };
 }

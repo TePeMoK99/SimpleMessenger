@@ -4,8 +4,9 @@ namespace Server
 {
 TCPClient::TCPClient(quintptr handle) : block_size {0}, handle {handle}
 {
-    socket = new QTcpSocket(this);
+    socket = new QSslSocket {this};
     socket->setSocketDescriptor(handle);
+//    socket->startServerEncryption();
     connect(socket, &QTcpSocket::readyRead, this, &TCPClient::onReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, &TCPClient::onDisconnected);
 }

@@ -44,8 +44,8 @@ private:
     static QByteArray makeByteArray(const quint8 &msg_type, const QString &param = {});
 
     QHash<quintptr, TCPClient*> not_auth_clients;
-    QHash<QString, Group> groups;
-    CRUD::Processor *crud_processor;
+    QHash<QString, Group>       groups;
+    CRUD::Processor             *crud_processor;
 
 };
 }
